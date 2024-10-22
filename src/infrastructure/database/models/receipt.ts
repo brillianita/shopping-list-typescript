@@ -1,11 +1,16 @@
-import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
+import { BelongsToManyAddAssociationMixin, BelongsToManyAddAssociationsMixin, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
 import { sequelize } from "./sequelize";
 import { Grocery } from "./grocery";
 
 export class Receipt extends Model<InferAttributes<Receipt>, InferCreationAttributes<Receipt>> {
   declare id: CreationOptional<string>;
   declare name: string;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
   declare Groceries?: Grocery[];
+
+  declare addGroceries : BelongsToManyAddAssociationsMixin<Grocery,string>
+  declare addGrocery : BelongsToManyAddAssociationMixin<Grocery, string>
 }
 
 Receipt.init({
@@ -24,7 +29,7 @@ Receipt.init({
 export class ReceiptGroceries extends Model<InferAttributes<ReceiptGroceries>, InferCreationAttributes<ReceiptGroceries>> {
   declare GroceryId: string;
   declare ReceiptId: string;
-  declare quantity: number;  // How much of a grocery item is on this receipt
+  declare quantity: number;
 }
 
 ReceiptGroceries.init({

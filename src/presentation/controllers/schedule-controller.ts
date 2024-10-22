@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { ScheduleSequelizeRepository } from "../persistance/schedule-sequelize-repository";
+import { ScheduleSequelizeRepository } from "../../persistance/repository/schedule-sequelize-repository";
 
 export class ScheduleController {
   private persistance: ScheduleSequelizeRepository | null = null;

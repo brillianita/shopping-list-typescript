@@ -1,4 +1,4 @@
-import { Grocery, unit } from "../models/grocery";
+import { Grocery, unit } from "../../infrastructure/database/models/grocery";
 
 interface IGrocery {
   id?: string;

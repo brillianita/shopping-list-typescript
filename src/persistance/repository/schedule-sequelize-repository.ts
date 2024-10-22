@@ -1,11 +1,11 @@
-import { Schedule, ScheduleReceipts } from "../models/schedule";
-import { Receipt } from "../models/receipt";
-import { Grocery } from "../models/grocery";
+import { Schedule, ScheduleReceipts } from "../../infrastructure/database/models/schedule";
+import { Receipt } from "../../infrastructure/database/models/receipt";
+import { Grocery } from "../../infrastructure/database/models/grocery";
 
 interface ISchedule {
   id?: string;
   name: string;
-  receipts: string[]; // Array of receipt IDs related to this schedule
+  receipts: string[]; 
 }
 
 export class ScheduleSequelizeRepository {
@@ -28,13 +28,13 @@ export class ScheduleSequelizeRepository {
 
   public async getAll(): Promise<Schedule[]> {
     return await Schedule.findAll({
-      include: Receipt, // Including receipts related to the schedule
+      include: Receipt,
     });
   }
 
   public async getById(id: string): Promise<Schedule | null> {
     return await Schedule.findByPk(id, {
-      include: Receipt, // Include receipts related to this schedule
+      include: Receipt, 
     });
   }
 
@@ -77,7 +77,7 @@ export class ScheduleSequelizeRepository {
           include: [
             {
               model: Grocery,
-              through: { attributes: ['quantity'] }  // Sertakan kolom 'quantity' dari tabel pivot
+              through: { attributes: ['quantity'] } 
             }
           ]
         }
@@ -91,13 +91,11 @@ export class ScheduleSequelizeRepository {
     let totalSpending = 0;
     const receiptDetails = [];
 
-    // Iterate through receipts and their groceries to calculate total spending and format the result
     for (const receipt of schedule.Receipts) {
       const groceriesDetails = [];
 
       if (receipt.Groceries) {
         for (const grocery of receipt.Groceries) {
-          // Akses 'quantity' dari tabel pivot menggunakan 'through'
           const quantity = (grocery as any).ReceiptGroceries.quantity;
           totalSpending += grocery.price * quantity;
 
@@ -106,7 +104,7 @@ export class ScheduleSequelizeRepository {
             id: grocery.id,
             name: grocery.name,
             price: grocery.price,
-            quantity: quantity  // Sertakan quantity dalam hasil
+            quantity: quantity  
           });
         }
       }

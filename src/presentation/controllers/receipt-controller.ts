@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { ReceiptSequelizeRepository } from "../persistance/receipt-sequelize-repository";
+import { ReceiptSequelizeRepository } from "../../persistance/repository/receipt-sequelize-repository";
 
 export class ReceiptController {
   private persistance: ReceiptSequelizeRepository | null = null;

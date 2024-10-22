@@ -26,7 +26,7 @@ Grocery.init({
     allowNull: false
   },
   unit: {
-    type: DataTypes.ENUM(...Object.values(unit)),
+    type: DataTypes.STRING,
     allowNull: false
   },
   price: {

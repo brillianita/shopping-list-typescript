@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { GrocerySequelizeRepository } from "../persistance/grocery-sequelize-repository";
-import { unit } from "../models/grocery";
+import { GrocerySequelizeRepository } from "../../persistance/repository/grocery-sequelize-repository";
+import { unit } from "../../infrastructure/database/models/grocery";
 
 export class GroceryController {
   private persistance: GrocerySequelizeRepository | null = null;
