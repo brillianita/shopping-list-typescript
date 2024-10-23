@@ -36,7 +36,7 @@ export class GrocerySequelizeRepository implements GroceryRepository {
         price: grocery.price,
       });
 
-      return entity;  
+      return entity;
     } catch (e) {
       await transaction.rollback();
       throw new AppError({
@@ -46,4 +46,21 @@ export class GrocerySequelizeRepository implements GroceryRepository {
       });
     }
   }
+
+  public async findAll(): Promise<EntityGrocery[]> {
+    const groceries = await Grocery.findAll();
+
+    // Konversi hasil dari Sequelize ke entity domain
+    const entityGroceries = groceries.map((grocery) =>
+      EntityGrocery.create({
+        id: grocery.id,
+        name: grocery.name,
+        unit: grocery.unit,
+        price: grocery.price,
+      })
+    );
+
+    return entityGroceries;
+}
+  
 }
