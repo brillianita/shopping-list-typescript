@@ -1,68 +1,66 @@
 import type { Request, Response } from "express";
 import { ReceiptSequelizeRepository } from "../../persistance/repository/receipt-sequelize-repository";
+import { ReceiptService } from "../../services/receipt-service";
+import { receiptScheme } from "../validation/receipt-validation";
+import { AppError, HttpCode } from "../../libs/exceptions/app-error";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../../types";
 
-export class ReceiptController {
-  private persistance: ReceiptSequelizeRepository | null = null;
 
-  constructor() {
-    this.persistance = new ReceiptSequelizeRepository();
-  }
-
-  public async createReceipt(req: Request, res: Response): Promise<void> {
-    try {
-      const { name, groceries } = req.body;
-      const result = await this.persistance?.create({ name, groceries });
-      res.status(201).json(result);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to create receipt" });
+@injectable()
+export default class ReceiptController {
+  constructor(@inject(TYPES.ReceiptService) private _receiptService: ReceiptService) { }
+  public async createReceipt(req: Request, res: Response): Promise<Response> {
+    const validatedReq = receiptScheme.safeParse(req.body);
+    console.log('reqbody', req.body)
+    if (!validatedReq.success) {
+      throw new AppError({
+        statusCode: HttpCode.VALIDATION_ERROR,
+        description: "Request validation error",
+        data: validatedReq.error.flatten().fieldErrors,
+      });
     }
+    const created = await this._receiptService.store(validatedReq.data);
+    return res.json({
+      message: "success",
+      data: created,
+    });
   }
 
-  public async getReceipts(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.persistance?.getAll();
-      res.status(200).json(result);
-    } catch (error) {
-      res.status(500).json({ error });
-    }
+  public async listReceipt(req: Request, res: Response): Promise<Response> {
+    const receipts = await this._receiptService.findAll();
+    return res.status(200).send({ message: "success", data: receipts });
   }
 
-  public async getReceiptById(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const result = await this.persistance?.getById(id);
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.status(404).json({ error: "Receipt not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch receipt" });
-    }
-  }
+  // public async findReceiptById(req: Request, res: Response): Promise<Response> {
+  //   const receipt = await this._receiptService.findById(req.params.id);
+  //   return res.json({
+  //     message: "success",
+  //     data: receipt,
+  //   });
+  // }
 
-  public async updateReceipt(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { name, groceries } = req.body;
-      const result = await this.persistance?.update(id, { name, groceries });
-      res.status(200).json(result);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update receipt" });
-    }
-  }
+  // public async updateReceipt(req: Request, res: Response): Promise<Response> {
+  //   const validatedReq = receiptScheme.safeParse(req.body);
+  //   if (!validatedReq.success) {
+  //     throw new AppError({
+  //       statusCode: HttpCode.VALIDATION_ERROR,
+  //       description: "Request validation error",
+  //       data: validatedReq.error.flatten().fieldErrors,
+  //     });
+  //   }
+  //   const created = await this._receiptService.update(req.params.id, validatedReq.data);
+  //   return res.json({
+  //     message: "success",
+  //     data: created,
+  //   });
+  // }
 
-  public async deleteReceipt(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const result = await this.persistance?.delete(id);
-      if (result) {
-        res.status(200).json({ message: "Receipt deleted successfully" });
-      } else {
-        res.status(404).json({ error: "Receipt not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete receipt" });
-    }
-  }
+
+  // public async deleteReceipt(req: Request, res: Response): Promise<Response> {
+  //   await this._receiptService.destroy(req.params.id);
+  //   return res.json({
+  //     message: "Receipt has been deleted",
+  //   });
+  // }
 }

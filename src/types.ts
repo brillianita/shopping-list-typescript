@@ -5,9 +5,11 @@ const TYPES = {
   HTTPRouter: Symbol.for("HTTPRouter"),
 
   GroceryRepository: Symbol.for("GroceryRepository"),
+  ReceiptRepository: Symbol.for("ReceiptRepository"),
 
   // Service Layer
  GroceryService: Symbol.for("GroceryService"),
+ ReceiptService: Symbol.for("ReceiptService"),
 };
 
 export { TYPES };

@@ -10,6 +10,7 @@ import { TYPES } from "../../types";
 @injectable()
 export default class GroceryController {
   constructor(@inject(TYPES.GroceryService) private _groceryService: GroceryService) { }
+  
   public async createGrocery(req: Request, res: Response): Promise<Response> {
     const validatedReq = groceryScheme.safeParse(req.body);
     console.log('reqbody', req.body)

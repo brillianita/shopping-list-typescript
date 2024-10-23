@@ -7,6 +7,7 @@ import { injectable } from "inversify";
 
 @injectable()
 export class GrocerySequelizeRepository implements GroceryRepository {
+  
   public async store(groceryDomain: EntityGrocery): Promise<EntityGrocery> {
     const transaction = await sequelize.transaction(); 
     try {

@@ -7,10 +7,10 @@ import { ScheduleReceipts } from "./schedule-receipts";
 
 (async () => {
 
-    // Apps Model Synchronisation
-    await Receipt.sync({ alter: { drop: false } });
-    await Grocery.sync({ alter: { drop: false } });
-    await ReceiptGroceries.sync({ alter: { drop: false } });
+  // Apps Model Synchronisation
+  await Receipt.sync({ alter: true });
+  await Grocery.sync({ alter: true });
+  await ReceiptGroceries.sync({ alter: true });
 })();
 
 Receipt.belongsToMany(Grocery, { through: ReceiptGroceries });

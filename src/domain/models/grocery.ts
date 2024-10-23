@@ -56,17 +56,4 @@ export class Grocery {
   get price(): number {
     return this._price;
   }
-
-  // Setters (Jika diperlukan, tambahkan validasi)
-  set name(value: string) {
-    this._name = value;
-  }
-
-  set unit(value: string | Unit) {
-    this._unit = value;
-  }
-
-  set price(value: number) {
-    this._price = value;
-  }
 }
