@@ -8,14 +8,11 @@ import { injectable } from "inversify";
 @injectable()
 export class GrocerySequelizeRepository implements GroceryRepository {
   public async store(groceryDomain: EntityGrocery): Promise<EntityGrocery> {
-    const transaction = await sequelize.transaction(); // Membuka transaksi
+    const transaction = await sequelize.transaction(); 
     try {
-      // Mengonversi unit dari string ke enum jika diperlukan
       const unit = typeof groceryDomain.unit === "string"
         ? Unit[groceryDomain.unit as keyof typeof Unit]
         : groceryDomain.unit;
-
-      // Membuat entitas Grocery menggunakan Sequelize
       const grocery = await Grocery.create(
         {
           name: groceryDomain.name,
@@ -67,7 +64,7 @@ export class GrocerySequelizeRepository implements GroceryRepository {
     if(!grocery) {
       throw new AppError({
         statusCode: HttpCode.NOT_FOUND,
-        description: "User was not found",
+        description: "Grocery was not found",
       });
     }
 
@@ -78,5 +75,42 @@ export class GrocerySequelizeRepository implements GroceryRepository {
       price: grocery.price,
     });
   }
+
+  async update(id: string, groceryDomain: EntityGrocery): Promise<EntityGrocery> {
+    const grocery = await Grocery.findByPk(id);
+
+    const unit = typeof groceryDomain.unit === "string"
+        ? Unit[groceryDomain.unit as keyof typeof Unit]
+        : groceryDomain.unit;
+    if(!grocery) {
+      throw new AppError({
+        statusCode: HttpCode.NOT_FOUND,
+        description: "Grocery was not found",
+      });
+    }
+    await grocery.update({
+      name: groceryDomain.name,
+      unit,
+      price: groceryDomain.price,
+    });
+    await grocery.reload();
+    return EntityGrocery.create({
+      name: grocery.name,
+      unit: grocery.unit,
+      price: grocery.price
+    })
+  }
+
+  async destroy(id: string): Promise<boolean> {
+    const grocery = await Grocery.findByPk(id);
+    if (!grocery) {
+        throw new AppError({
+            statusCode: HttpCode.NOT_FOUND,
+            description: "Grocery was not found",
+        });
+    }
+    await grocery.destroy();
+    return true;
+}
 
 }
