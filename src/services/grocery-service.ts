@@ -1,0 +1,23 @@
+import { IGrocery, Grocery } from "../domain/models/grocery";
+import { GroceryRepository } from "../domain/service/grocery-repository";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../types";
+
+@injectable()
+export class GroceryService {
+  constructor(@inject(TYPES.GroceryRepository) private _repository: GroceryRepository) {}
+
+  public async store(_grocery: IGrocery): Promise<IGrocery> {
+      const groceryData = Grocery.create(_grocery);
+      
+      const grocery = await this._repository.store(
+          Grocery.create({
+              name: _grocery.name,
+              unit: _grocery.unit,
+              price: _grocery.price,
+          })
+      );
+      return grocery.unmarshal();
+  }
+
+}

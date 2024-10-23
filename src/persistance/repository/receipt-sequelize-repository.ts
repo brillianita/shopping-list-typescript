@@ -1,4 +1,5 @@
-import { Receipt, ReceiptGroceries } from "../../infrastructure/database/models/receipt";
+import { Receipt } from "../../infrastructure/database/models/receipt";
+import { ReceiptGroceries } from "../../infrastructure/database/models/receipt-groceries";
 import { Grocery } from "../../infrastructure/database/models/grocery";
 import { Op } from "sequelize";
 
@@ -9,38 +10,69 @@ interface IReceipt {
 }
 
 export class ReceiptSequelizeRepository {
+  // public async create(props: IReceipt): Promise<Receipt> {
+  //   const { groceries, ...receiptProps } = props;
+  //   const gcrs = await Grocery.findAll({where:{id:{[Op.in]:groceries.map(el => el.id)}}})
+  //   const hashMap : {[key:string]:{model:Grocery, quantity:number}} = {}
+  //   gcrs.forEach(el => {
+  //     if(!hashMap[el.id]){
+  //       hashMap[el.id] = {model:el,quantity:0}
+  //     }
+  //   })
+  //   groceries.forEach(el =>{
+  //     hashMap[el.id].quantity = el.quantity
+  //   })
+
+  //   const newGrocery = Object.entries(hashMap).map(([key,value])=>{
+  //     return {
+  //       model:value.model,
+  //       quantity:value.quantity
+  //     }
+  //   })
+  //   //validasi untuk grocery//
+
+  //   // ===================== //
+  //   const receipt = await Receipt.create(receiptProps);
+  //   await Promise.all([...newGrocery].map(grocery => receipt.addGrocery(grocery.model,{through:{quantity:grocery.quantity}})))
+  //   return receipt;
+  // }
+
   public async create(props: IReceipt): Promise<Receipt> {
     const { groceries, ...receiptProps } = props;
-    const gcrs = await Grocery.findAll({where:{id:{[Op.in]:groceries.map(el => el.id)}}})
-    const hashMap : {[key:string]:{model:Grocery, quantity:number}} = {}
-    gcrs.forEach(el => {
-      if(!hashMap[el.id]){
-        hashMap[el.id] = {model:el,quantity:0}
-      }
-    })
-    groceries.forEach(el =>{
-      hashMap[el.id].quantity = el.quantity
-    })
+    const resultFindAll = await Grocery.findAll();
+    console.log('Grocery Find All', resultFindAll);
+    // Fetch the groceries that match the provided IDs
+    const fetchedGroceries = await Grocery.findAll({
+      where: { id: { [Op.in]: groceries.map(grocery => grocery.id) } }
+    });
 
-    const newGrocery = Object.entries(hashMap).map(([key,value])=>{
-      return {
-        model:value.model,
-        quantity:value.quantity
-      }
-    })
-    //validasi untuk grocery//
-
-    // ===================== //
+    console.log('fetchedGroceries', fetchedGroceries);
+    console.log('groceries', groceries);
+    console.log('receiptProps', receiptProps);
+    console.log('props', props)
+    // Validate that all groceries were found
+    if (fetchedGroceries.length !== groceries.length) {
+      throw new Error("One or more groceries were not found.");
+    }
+  
+    // Create the receipt
     const receipt = await Receipt.create(receiptProps);
-    await Promise.all([...newGrocery].map(grocery => receipt.addGrocery(grocery.model,{through:{quantity:grocery.quantity}})))
+    console.log('receipt create', receipt);
+  
+    // Add groceries to the receipt with their respective quantities
+    for (const grocery of groceries) {
+      const matchingGrocery = fetchedGroceries.find(g => g.id === grocery.id);
+      if (matchingGrocery) {
+        await receipt.addGrocery(matchingGrocery, {
+          through: { quantity: grocery.quantity }
+        });
+      }
+    }
+  
     return receipt;
   }
+  
 
-  // public async getAll(): Promise<Receipt[]> {
-  //   return await Receipt.findAll({
-  //     include: Grocery, // Including groceries
-  //   });
-  // }
 
   public async getAll(): Promise<any[]> {
     const receipts = await Receipt.findAll({

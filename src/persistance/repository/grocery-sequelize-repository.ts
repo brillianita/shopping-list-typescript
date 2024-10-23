@@ -1,36 +1,49 @@
-import { Grocery, unit } from "../../infrastructure/database/models/grocery";
+import { GroceryRepository } from "../../domain/service/grocery-repository";
+import { Grocery } from "../../infrastructure/database/models/grocery";
+import { Grocery as EntityGrocery, IGrocery, Unit } from "../../domain/models/grocery";
+import { sequelize } from "../../infrastructure/database/sequelize";
+import { AppError, HttpCode } from "../../libs/exceptions/app-error";
+import { injectable } from "inversify";
 
-interface IGrocery {
-  id?: string;
-  name: string;
-  unit: unit;
-  price: number;
-}
+@injectable()
+export class GrocerySequelizeRepository implements GroceryRepository {
+  public async store(groceryDomain: EntityGrocery): Promise<EntityGrocery> {
+    const transaction = await sequelize.transaction(); // Membuka transaksi
+    try {
+      // Mengonversi unit dari string ke enum jika diperlukan
+      const unit = typeof groceryDomain.unit === "string"
+        ? Unit[groceryDomain.unit as keyof typeof Unit]
+        : groceryDomain.unit;
 
-export class GrocerySequelizeRepository {
-  public async create(props: IGrocery): Promise<Grocery> {
-    const createdGrocery = await Grocery.create(props);
-    return createdGrocery;
-  }
+      // Membuat entitas Grocery menggunakan Sequelize
+      const grocery = await Grocery.create(
+        {
+          name: groceryDomain.name,
+          unit,
+          price: groceryDomain.price,
+        },
+        {
+          transaction,
+        }
+      );
 
-  public async getAll(): Promise<Grocery[]> {
-    return await Grocery.findAll();
-  }
 
-  public async getById(id: string): Promise<Grocery | null> {
-    return await Grocery.findByPk(id);
-  }
+      await transaction.commit();
 
-  public async update(id: string, props: Partial<IGrocery>): Promise<[number, Grocery[]]> {
-    return await Grocery.update(props, {
-      where: { id },
-      returning: true
-    });
-  }
+      const entity = EntityGrocery.create({
+        name: grocery.name,
+        unit: grocery.unit,
+        price: grocery.price,
+      });
 
-  public async delete(id: string): Promise<number> {
-    return await Grocery.destroy({
-      where: { id }
-    });
+      return entity;  
+    } catch (e) {
+      await transaction.rollback();
+      throw new AppError({
+        statusCode: HttpCode.BAD_REQUEST,
+        description: "Failed to create grocery",
+        error: e,
+      });
+    }
   }
 }

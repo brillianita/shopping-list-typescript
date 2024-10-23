@@ -23,7 +23,7 @@ export class ReceiptController {
       const result = await this.persistance?.getAll();
       res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch receipts" });
+      res.status(500).json({ error });
     }
   }
 

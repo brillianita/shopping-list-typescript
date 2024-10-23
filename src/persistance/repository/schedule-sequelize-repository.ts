@@ -1,4 +1,5 @@
-import { Schedule, ScheduleReceipts } from "../../infrastructure/database/models/schedule";
+import { Schedule } from "../../infrastructure/database/models/schedule";
+import { ScheduleReceipts } from "../../infrastructure/database/models/schedule-receipts";
 import { Receipt } from "../../infrastructure/database/models/receipt";
 import { Grocery } from "../../infrastructure/database/models/grocery";
 

@@ -1,17 +1,11 @@
 import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
-import { sequelize } from "./sequelize";
-
-export enum unit {
-  kg = 'kg',
-  gram = 'gram',
-  liter = 'liter',
-  unit = 'unit',
-}
+import { sequelize } from "../sequelize";
+import { Unit } from "../../../domain/models/grocery";
 
 export class Grocery extends Model<InferAttributes<Grocery>, InferCreationAttributes<Grocery>> {
   declare id: CreationOptional<string>;
   declare name: string;
-  declare unit: unit;
+  declare unit: Unit;
   declare price: number;
 }
 
@@ -26,7 +20,7 @@ Grocery.init({
     allowNull: false
   },
   unit: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING, 
     allowNull: false
   },
   price: {
