@@ -19,10 +19,17 @@ export class GroceryService {
       );
       return grocery.unmarshal();
   }
+
   public async findAll(): Promise<IGrocery[]> {
     const groceries = await this._repository.findAll();
     const groceryDto = groceries.map((grocery) => grocery.unmarshal());
     return groceryDto;
+  }
+
+  public async findById(id: string): Promise<IGrocery> {
+    const grocery = await this._repository.findById(id);
+    return grocery.unmarshal();
+
   }
 
 }

@@ -50,7 +50,6 @@ export class GrocerySequelizeRepository implements GroceryRepository {
   public async findAll(): Promise<EntityGrocery[]> {
     const groceries = await Grocery.findAll();
 
-    // Konversi hasil dari Sequelize ke entity domain
     const entityGroceries = groceries.map((grocery) =>
       EntityGrocery.create({
         id: grocery.id,
@@ -61,6 +60,23 @@ export class GrocerySequelizeRepository implements GroceryRepository {
     );
 
     return entityGroceries;
-}
-  
+  }
+
+  async findById(id: string): Promise<EntityGrocery> {
+    const grocery = await Grocery.findByPk(id);
+    if(!grocery) {
+      throw new AppError({
+        statusCode: HttpCode.NOT_FOUND,
+        description: "User was not found",
+      });
+    }
+
+    return EntityGrocery.create({
+      id: grocery.id,
+      name: grocery.name,
+      unit: grocery.unit,
+      price: grocery.price,
+    });
+  }
+
 }

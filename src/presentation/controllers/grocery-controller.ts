@@ -31,4 +31,12 @@ export default class GroceryController {
     const groceries = await this._groceryService.findAll();
     return res.status(200).send({message: "success", data: groceries.map((val) => val)});
   }
+
+  public async findGroceryById(req: Request, res: Response): Promise<Response> {
+    const grocery = await this._groceryService.findById(req.params.id);
+    return res.json({
+      message: "success",
+      data: grocery,
+    });
+  }
 }

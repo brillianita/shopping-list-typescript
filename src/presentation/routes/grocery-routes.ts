@@ -19,6 +19,11 @@ export class GroceryRoutes {
       `/${this.route}`,
       asyncWrap(this.GroceryControllerInstance.listGroceries.bind(this.GroceryControllerInstance))
     )
+
+    router.get(
+      `/${this.route}/:id`,
+      asyncWrap(this.GroceryControllerInstance.findGroceryById.bind(this.GroceryControllerInstance))
+    )
   }
 }
 
