@@ -1,42 +1,42 @@
-// export interface IReceipt {
-//   id?: string;
-//   name: string;
-//   receipts: {id: string; quantity: number}[];
-// }
 
-// export class Receipt {
-//   private _id?: string;
-//   private _name: string;
-//   private _groceries: { id: string; quantity: number}[];
+export interface ISchedule {
+  id?: string;
+  name: string;
+  receipts: string[];
+}
 
-//   private constructor(props: IReceipt) {
-//     this._id = props.id;
-//     this._name = props.name;
-//     this._groceries = props.groceries;
-//   }
+export class Schedule {
+  private _id?: string;
+  private _name: string;
+  private _receipts: string[];
 
-//   public static create(props: IReceipt): Receipt {
-//     const instance = new Receipt(props);
-//     return instance;
-//   }
+  private constructor(props: ISchedule) {
+    this._id = props.id;
+    this._name = props.name;
+    this._receipts = props.receipts;
+  }
 
-//   public unmarshal(): IReceipt {
-//     return {
-//       id: this._id,
-//       name: this._name,
-//       groceries: this._groceries,
-//     };
-//   }
+  public static create(props: ISchedule): Schedule {
+    return new Schedule(props);
+  }
 
-//   get id(): string | undefined {
-//     return this._id;
-//   }
+  public unmarshal(): ISchedule {
+    return {
+      id: this._id,
+      name: this._name,
+      receipts: this._receipts,
+    };
+  }
 
-//   get name(): string {
-//     return this._name;
-//   }
-  
-//   get groceries(): {id: string; quantity: number}[] {
-//     return this._groceries;
-//   }
-// }
+  get id(): string | undefined {
+    return this._id;
+  }
+
+  get name(): string {
+    return this._name;
+  }
+
+  get receipts():string[] {
+    return this._receipts;
+  }
+}

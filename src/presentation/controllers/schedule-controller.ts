@@ -1,83 +1,88 @@
-import type { Request, Response } from "express";
-import { ScheduleSequelizeRepository } from "../../persistance/repository/schedule-sequelize-repository";
+import { Request, Response } from "express";
+import { inject, injectable } from "inversify";
+import { ScheduleService } from "../../services/schedule-service";
+import { scheduleScheme } from "../validation/schedule-validation";
+import { AppError, HttpCode } from "../../libs/exceptions/app-error";
+import { TYPES } from "../../types";
 
-export class ScheduleController {
-  private persistance: ScheduleSequelizeRepository | null = null;
+@injectable()
+export default class ScheduleController {
+  constructor(
+    @inject(TYPES.ScheduleService) private _scheduleService: ScheduleService
+  ) { }
 
-  constructor() {
-    this.persistance = new ScheduleSequelizeRepository();
-  }
+  // Membuat jadwal baru
+  public async createSchedule(req: Request, res: Response): Promise<Response> {
+    const validatedReq = scheduleScheme.safeParse(req.body);
 
-  public async createSchedule(req: Request, res: Response): Promise<void> {
-    try {
-      const { name, receipts } = req.body;
-      const result = await this.persistance?.create({ name, receipts });
-      res.status(201).json(result);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to create schedule" });
+    // Validasi input request body
+    if (!validatedReq.success) {
+      throw new AppError({
+        statusCode: HttpCode.VALIDATION_ERROR,
+        description: "Request validation error",
+        data: validatedReq.error.flatten().fieldErrors,
+      });
     }
+
+    // Simpan jadwal baru melalui ScheduleService
+    const createdSchedule = await this._scheduleService.store(validatedReq.data);
+
+    return res.status(201).json({
+      message: "Schedule created successfully",
+      data: createdSchedule,
+    });
   }
 
-  public async getSchedules(req: Request, res: Response): Promise<void> {
-    try {
-      const result = await this.persistance?.getAll();
-      res.status(200).json(result);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch schedules" });
-    }
-  }
+  // // Mendapatkan semua jadwal
+  // public async listSchedules(req: Request, res: Response): Promise<Response> {
+  //   const schedules = await this._scheduleService.findAll();
+  //   return res.status(200).json({
+  //     message: "success",
+  //     data: schedules,
+  //   });
+  // }
 
-  public async getScheduleById(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const result = await this.persistance?.getById(id);
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.status(404).json({ error: "Schedule not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Failed to fetch schedule" });
-    }
-  }
+  // // Mendapatkan jadwal berdasarkan ID
+  // public async getScheduleById(req: Request, res: Response): Promise<Response> {
+  //   const { id } = req.params;
 
-  public async updateSchedule(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const { name, receipts } = req.body;
-      const result = await this.persistance?.update(id, { name, receipts });
-      res.status(200).json(result);
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update schedule" });
-    }
-  }
+  //   const schedule = await this._scheduleService.findById(id);
+  //   return res.status(200).json({
+  //     message: "success",
+  //     data: schedule,
+  //   });
+  // }
 
-  public async deleteSchedule(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const result = await this.persistance?.delete(id);
-      if (result) {
-        res.status(200).json({ message: "Schedule deleted successfully" });
-      } else {
-        res.status(404).json({ error: "Schedule not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Failed to delete schedule" });
-    }
-  }
+  // // Memperbarui jadwal berdasarkan ID
+  // public async updateSchedule(req: Request, res: Response): Promise<Response> {
+  //   const { id } = req.params;
 
-  public async getTotalSpending(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params;
-      const totalSpendingDetails = await this.persistance?.calculateTotalSpending(id);
-      if (totalSpendingDetails) {
-        res.status(200).json(totalSpendingDetails);
-      } else {
-        res.status(404).json({ error: "Schedule not found" });
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Failed to calculate total spending" });
-    }
-  }
-  
+  //   // Validasi input request body
+  //   const validatedReq = scheduleScheme.safeParse(req.body);
+  //   if (!validatedReq.success) {
+  //     throw new AppError({
+  //       statusCode: HttpCode.VALIDATION_ERROR,
+  //       description: "Request validation error",
+  //       data: validatedReq.error.flatten().fieldErrors,
+  //     });
+  //   }
+
+  //   // Update jadwal melalui ScheduleService
+  //   const updatedSchedule = await this._scheduleService.update(id, validatedReq.data);
+
+  //   return res.status(200).json({
+  //     message: "Schedule updated successfully",
+  //     data: updatedSchedule,
+  //   });
+  // }
+
+  // // Menghapus jadwal berdasarkan ID
+  // public async deleteSchedule(req: Request, res: Response): Promise<Response> {
+  //   const { id } = req.params;
+
+  //   await this._scheduleService.destroy(id);
+  //   return res.status(200).json({
+  //     message: `Schedule with ID ${id} has been deleted.`,
+  //   });
+  // }
 }

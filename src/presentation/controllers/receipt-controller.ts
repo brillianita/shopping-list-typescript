@@ -1,5 +1,4 @@
-import type { Request, Response } from "express";
-import { ReceiptSequelizeRepository } from "../../persistance/repository/receipt-sequelize-repository";
+import { Request, Response } from "express";
 import { ReceiptService } from "../../services/receipt-service";
 import { receiptScheme } from "../validation/receipt-validation";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";

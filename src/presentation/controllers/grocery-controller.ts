@@ -1,5 +1,4 @@
-import type { Request, Response } from "express";
-import { GrocerySequelizeRepository } from "../../persistance/repository/grocery-sequelize-repository";
+import  { Request, Response } from "express";
 import { GroceryService } from "../../services/grocery-service";
 import { groceryScheme } from "../validation/grocery-validation";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";

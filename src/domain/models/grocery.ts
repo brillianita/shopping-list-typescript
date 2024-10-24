@@ -30,7 +30,6 @@ export class Grocery {
     return instance;
   }
 
-  // Mengembalikan data entitas sebagai objek plain
   public unmarshal(): IGrocery {
     return {
       id: this._id,

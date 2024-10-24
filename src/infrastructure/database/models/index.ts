@@ -11,6 +11,8 @@ import { ScheduleReceipts } from "./schedule-receipts";
   await Receipt.sync({ alter: true });
   await Grocery.sync({ alter: true });
   await ReceiptGroceries.sync({ alter: true });
+  await Schedule.sync({ alter: true });
+  await ScheduleReceipts.sync({ alter: true });
 })();
 
 Receipt.belongsToMany(Grocery, { through: ReceiptGroceries });

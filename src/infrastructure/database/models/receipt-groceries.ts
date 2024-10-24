@@ -20,7 +20,9 @@ ReceiptGroceries.init({
     references: {
       model: 'Receipts',
       key: 'id',
-    }
+    },
+    onDelete: "CASCADE", 
+    onUpdate: "CASCADE",
   },
   quantity: {
     type: DataTypes.INTEGER,

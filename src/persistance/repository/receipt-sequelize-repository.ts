@@ -11,7 +11,6 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
   public async store(receiptDomain: EntityReceipt): Promise<EntityReceipt> {
     const transaction = await sequelize.transaction();
     try {
-      // Membuat entitas receipt
       const receipt = await Receipt.create(
         {
           name: receiptDomain.name,
