@@ -1,4 +1,4 @@
-import  { Request, Response } from "express";
+import { Request, Response } from "express";
 import { GroceryService } from "../../services/grocery-service";
 import { groceryScheme } from "../validation/grocery-validation";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";
@@ -9,7 +9,7 @@ import { TYPES } from "../../types";
 @injectable()
 export default class GroceryController {
   constructor(@inject(TYPES.GroceryService) private _groceryService: GroceryService) { }
-  
+
   public async createGrocery(req: Request, res: Response): Promise<Response> {
     const validatedReq = groceryScheme.safeParse(req.body);
     console.log('reqbody', req.body)
@@ -21,11 +21,11 @@ export default class GroceryController {
       });
     }
     const created = await this._groceryService.store(validatedReq.data);
-    return res.json({
-      message: "success",
-      data: created,
-    });
-  }
+      return res.json({
+        message: "success",
+        data: created,
+      });
+    }
 
   public async listGroceries(req: Request, res: Response): Promise<Response> {
     const groceries = await this._groceryService.findAll();
@@ -60,7 +60,7 @@ export default class GroceryController {
   public async deleteGrocery(req: Request, res: Response): Promise<Response> {
     await this._groceryService.destroy(req.params.id);
     return res.json({
-        message: "Grocery has been deleted",
+      message: "Grocery has been deleted",
     });
-}
+  }
 }

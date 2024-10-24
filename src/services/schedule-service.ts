@@ -27,4 +27,13 @@ export class ScheduleService {
         error,
       });
     }
-  }}
+  }
+
+  public async findAll(): Promise<ISchedule[]> {
+    const schedules = await this._repository.findAll();
+    const shceduleDto = schedules.map((schedule) => schedule.unmarshal());
+    return shceduleDto;
+  }
+}
+
+  

@@ -2,7 +2,7 @@
 export interface ISchedule {
   id?: string;
   name: string;
-  receipts: string[];
+  receipts: any[];
 }
 
 export class Schedule {
