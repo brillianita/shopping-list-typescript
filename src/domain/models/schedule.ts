@@ -8,7 +8,7 @@ export interface ISchedule {
 export class Schedule {
   private _id?: string;
   private _name: string;
-  private _receipts: string[];
+  private _receipts: any[];
 
   private constructor(props: ISchedule) {
     this._id = props.id;
@@ -36,7 +36,7 @@ export class Schedule {
     return this._name;
   }
 
-  get receipts():string[] {
+  get receipts():any[] {
     return this._receipts;
   }
 }

@@ -6,6 +6,7 @@ import { Grocery } from "../../infrastructure/database/models/grocery";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";
 import { sequelize } from "../../infrastructure/database/sequelize";
 import { injectable } from "inversify";
+import { log } from "console";
 
 @injectable()
 export class ScheduleSequelizeRepository implements ScheduleRepository {
@@ -42,7 +43,7 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
       const entity = EntitySchedule.create({
         id: schedule.id,
         name: schedule.name,
-        receipts: receipts.map(receipt => receipt.id), 
+        receipts: receipts.map(receipt => receipt.id),
       });
 
       return entity;
@@ -66,7 +67,7 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
           }],
         }],
       });
-      console.log("schedules", schedules)
+
       return schedules.map((schedule) => {
         return EntitySchedule.create({
           id: schedule.id,
@@ -74,6 +75,7 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
           receipts: schedule.Receipts?.map(receipt => ({
             id: receipt.id,
             name: receipt.name,
+            totalSpend: receipt.Groceries?.map(grocery => grocery.price * (grocery as any).ReceiptGroceries.quantity).reduce((acc, curr) => acc + curr, 0),
             groceries: receipt.Groceries?.map(grocery => ({
               id: grocery.id,
               name: grocery.name,
@@ -85,6 +87,7 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
         });
       });
     } catch (e) {
+      // console.log(e)
       throw new AppError({
         statusCode: HttpCode.INTERNAL_SERVER_ERROR,
         description: "Failed to fetch receipts",
