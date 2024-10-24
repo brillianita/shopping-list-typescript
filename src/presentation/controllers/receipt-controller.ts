@@ -32,6 +32,16 @@ export default class ReceiptController {
     return res.status(200).send({ message: "success", data: receipts });
   }
 
+  public async findReceiptById(req: Request, res: Response): Promise<Response> {
+      const receiptId = req.params.id;
+      const receipt = await this._receiptService.findById(receiptId); 
+
+      return res.json({
+        message: "success",
+        data: receipt,
+      });
+  }
+
   // public async findReceiptById(req: Request, res: Response): Promise<Response> {
   //   const receipt = await this._receiptService.findById(req.params.id);
   //   return res.json({

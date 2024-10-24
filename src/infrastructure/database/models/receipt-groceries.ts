@@ -25,5 +25,6 @@ ReceiptGroceries.init({
   quantity: {
     type: DataTypes.INTEGER,
     allowNull: false
-  }
+  },
+
 }, { sequelize, tableName: "ReceiptGroceries" });

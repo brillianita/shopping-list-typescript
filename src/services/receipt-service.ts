@@ -40,4 +40,26 @@ export class ReceiptService {
       });
     }
   }
+
+  public async findById(receiptId: string): Promise<IReceipt> {
+    try {
+      const receipt = await this._repository.findById(receiptId);
+      if (!receipt) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Receipt with ID ${receiptId} not found`,
+        });
+      }
+
+      console.log("Receipt fetched:", receipt);
+
+      return receipt.unmarshal();
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to fetch receipt with ID ${receiptId}`,
+        error,
+      });
+    }
+  }
 }
