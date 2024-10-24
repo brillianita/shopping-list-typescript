@@ -7,9 +7,9 @@ import { injectable } from "inversify";
 
 @injectable()
 export class GrocerySequelizeRepository implements GroceryRepository {
-  
+
   public async store(groceryDomain: EntityGrocery): Promise<EntityGrocery> {
-    const transaction = await sequelize.transaction(); 
+    const transaction = await sequelize.transaction();
     try {
       const unit = typeof groceryDomain.unit === "string"
         ? Unit[groceryDomain.unit as keyof typeof Unit]
@@ -62,7 +62,7 @@ export class GrocerySequelizeRepository implements GroceryRepository {
 
   async findById(id: string): Promise<EntityGrocery> {
     const grocery = await Grocery.findByPk(id);
-    if(!grocery) {
+    if (!grocery) {
       throw new AppError({
         statusCode: HttpCode.NOT_FOUND,
         description: "Grocery was not found",
@@ -81,9 +81,9 @@ export class GrocerySequelizeRepository implements GroceryRepository {
     const grocery = await Grocery.findByPk(id);
 
     const unit = typeof groceryDomain.unit === "string"
-        ? Unit[groceryDomain.unit as keyof typeof Unit]
-        : groceryDomain.unit;
-    if(!grocery) {
+      ? Unit[groceryDomain.unit as keyof typeof Unit]
+      : groceryDomain.unit;
+    if (!grocery) {
       throw new AppError({
         statusCode: HttpCode.NOT_FOUND,
         description: "Grocery was not found",
@@ -105,13 +105,13 @@ export class GrocerySequelizeRepository implements GroceryRepository {
   async destroy(id: string): Promise<boolean> {
     const grocery = await Grocery.findByPk(id);
     if (!grocery) {
-        throw new AppError({
-            statusCode: HttpCode.NOT_FOUND,
-            description: "Grocery was not found",
-        });
+      throw new AppError({
+        statusCode: HttpCode.NOT_FOUND,
+        description: "Grocery was not found",
+      });
     }
     await grocery.destroy();
     return true;
-}
+  }
 
 }

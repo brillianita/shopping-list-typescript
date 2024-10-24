@@ -4,6 +4,6 @@ export interface ReceiptRepository {
     findAll(): Promise<Receipt[]>;
     findById(id: string): Promise<Receipt>;
     store(user: IReceipt): Promise<Receipt>;
-    // update(id: string, user: IReceipt): Promise<Receipt>;
-    // destroy(id: string): Promise<boolean>;
+    update(id: string, user: IReceipt): Promise<Receipt>;
+    destroy(id: string): Promise<boolean>;
 }

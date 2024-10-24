@@ -1,4 +1,4 @@
-import { BelongsToManyAddAssociationMixin, BelongsToManyAddAssociationsMixin, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
+import { BelongsToManyAddAssociationMixin, BelongsToManyAddAssociationsMixin, BelongsToManyRemoveAssociationsMixin, CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model } from "sequelize";
 import { sequelize } from "../sequelize";
 import { Grocery } from "./grocery";
 
@@ -11,6 +11,7 @@ export class Receipt extends Model<InferAttributes<Receipt>, InferCreationAttrib
 
   declare addGroceries : BelongsToManyAddAssociationsMixin<Grocery,string>
   declare addGrocery : BelongsToManyAddAssociationMixin<Grocery, string>
+  declare removeGroceries: BelongsToManyRemoveAssociationsMixin<Grocery, string>;
 }
 
 Receipt.init({

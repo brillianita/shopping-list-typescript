@@ -42,35 +42,27 @@ export default class ReceiptController {
       });
   }
 
-  // public async findReceiptById(req: Request, res: Response): Promise<Response> {
-  //   const receipt = await this._receiptService.findById(req.params.id);
-  //   return res.json({
-  //     message: "success",
-  //     data: receipt,
-  //   });
-  // }
 
-  // public async updateReceipt(req: Request, res: Response): Promise<Response> {
-  //   const validatedReq = receiptScheme.safeParse(req.body);
-  //   if (!validatedReq.success) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.VALIDATION_ERROR,
-  //       description: "Request validation error",
-  //       data: validatedReq.error.flatten().fieldErrors,
-  //     });
-  //   }
-  //   const created = await this._receiptService.update(req.params.id, validatedReq.data);
-  //   return res.json({
-  //     message: "success",
-  //     data: created,
-  //   });
-  // }
+  public async updateReceipt(req: Request, res: Response): Promise<Response> {
+    const validatedReq = receiptScheme.safeParse(req.body);
+    if (!validatedReq.success) {
+      throw new AppError({
+        statusCode: HttpCode.VALIDATION_ERROR,
+        description: "Request validation error",
+        data: validatedReq.error.flatten().fieldErrors,
+      });
+    }
+    const created = await this._receiptService.update(req.params.id, validatedReq.data);
+    return res.json({
+      message: "success",
+      data: created,
+    });
+  }
 
-
-  // public async deleteReceipt(req: Request, res: Response): Promise<Response> {
-  //   await this._receiptService.destroy(req.params.id);
-  //   return res.json({
-  //     message: "Receipt has been deleted",
-  //   });
-  // }
+  public async deleteReceipt(req: Request, res: Response): Promise<Response> {
+    await this._receiptService.destroy(req.params.id);
+    return res.json({
+      message: "Receipt has been deleted",
+    });
+  }
 }

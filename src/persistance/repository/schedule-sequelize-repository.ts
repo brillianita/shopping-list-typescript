@@ -6,7 +6,7 @@ import { Grocery } from "../../infrastructure/database/models/grocery";
 interface ISchedule {
   id?: string;
   name: string;
-  receipts: string[]; 
+  receipts: string[];
 }
 
 export class ScheduleSequelizeRepository {
@@ -35,7 +35,7 @@ export class ScheduleSequelizeRepository {
 
   public async getById(id: string): Promise<Schedule | null> {
     return await Schedule.findByPk(id, {
-      include: Receipt, 
+      include: Receipt,
     });
   }
 
@@ -48,10 +48,8 @@ export class ScheduleSequelizeRepository {
     });
 
     if (receipts && receipts.length) {
-      // First, delete all existing receipts for this schedule
       await ScheduleReceipts.destroy({ where: { ScheduleId: id } });
 
-      // Then, add the new receipts
       for (const receiptId of receipts) {
         await ScheduleReceipts.create({
           ScheduleId: id,
@@ -64,12 +62,10 @@ export class ScheduleSequelizeRepository {
   }
 
   public async delete(id: string): Promise<number> {
-    // Delete the schedule and its associated receipts from the pivot table
     await ScheduleReceipts.destroy({ where: { ScheduleId: id } });
     return await Schedule.destroy({ where: { id } });
   }
 
-  // Function to calculate total spending for a given schedule
   public async calculateTotalSpending(id: string): Promise<any | null> {
     const schedule = await Schedule.findByPk(id, {
       include: [
@@ -78,7 +74,7 @@ export class ScheduleSequelizeRepository {
           include: [
             {
               model: Grocery,
-              through: { attributes: ['quantity'] } 
+              through: { attributes: ['quantity'] }
             }
           ]
         }
@@ -100,24 +96,22 @@ export class ScheduleSequelizeRepository {
           const quantity = (grocery as any).ReceiptGroceries.quantity;
           totalSpending += grocery.price * quantity;
 
-          // Push grocery details into array
           groceriesDetails.push({
             id: grocery.id,
             name: grocery.name,
             price: grocery.price,
-            quantity: quantity  
+            quantity: quantity
           });
         }
       }
 
-      // Push receipt details into array
       receiptDetails.push({
         name: receipt.name,
         groceries: groceriesDetails
       });
     }
 
-    // Format the final output
+
     return {
       id: schedule.id,
       totalSpending: totalSpending,

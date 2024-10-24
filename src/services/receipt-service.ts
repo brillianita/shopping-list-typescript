@@ -62,4 +62,52 @@ export class ReceiptService {
       });
     }
   }
+
+  public async update(receiptId: string, updatedReceipt: IReceipt): Promise<IReceipt> {
+    try {
+      const receipt = await this._repository.findById(receiptId);
+      if (!receipt) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Receipt with ID ${receiptId} not found`,
+        });
+      }
+
+      const updated = await this._repository.update(receiptId, Receipt.create(updatedReceipt));
+      console.log("Receipt updated:", updated);
+
+      return updated.unmarshal();
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to update receipt with ID ${receiptId}`,
+        error,
+      });
+    }
+  }
+
+  public async destroy(id: string): Promise<boolean> {
+    try {
+      const receipt = await this._repository.findById(id);
+      if (!receipt) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Receipt with ID ${id} not found`,
+        });
+      }
+
+      await this._repository.destroy(id);
+
+      console.log(`Receipt with ID ${id} deleted successfully.`);
+      return true;
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to delete receipt with ID ${id}`,
+        error,
+      });
+    }
+  }
+
+
 }
