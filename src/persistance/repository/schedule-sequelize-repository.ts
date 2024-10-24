@@ -72,10 +72,20 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
         return EntitySchedule.create({
           id: schedule.id,
           name: schedule.name,
+          totalSpend: schedule.Receipts?.reduce((acc, receipt) => {
+            console.log("acc", acc)
+            console.log("receipt", receipt)
+            const receiptTotal = receipt.Groceries?.reduce((groceryAcc: any, grocery: any) => {
+              console.log("groceryAcc", groceryAcc)
+              console.log("grocery", grocery)
+              return groceryAcc + (grocery.price * (grocery as any).ReceiptGroceries.quantity);
+            }, 0);
+            console.log("receiptTotal", receiptTotal)
+            return acc + receiptTotal;
+          }, 0),
           receipts: schedule.Receipts?.map(receipt => ({
             id: receipt.id,
             name: receipt.name,
-            totalSpend: receipt.Groceries?.map(grocery => grocery.price * (grocery as any).ReceiptGroceries.quantity).reduce((acc, curr) => acc + curr, 0),
             groceries: receipt.Groceries?.map(grocery => ({
               id: grocery.id,
               name: grocery.name,
@@ -86,6 +96,21 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
           })) || [],
         });
       });
+      // newSchedules.forEach(schedule => {
+      //   const totalSpend = schedule.receipts.reduce((acc, receipt) => {
+      //     // Sum the price * quantity for each grocery in the current receipt
+      //     const receiptTotal = receipt.groceries.reduce((groceryAcc:any, grocery:any) => {
+      //         return groceryAcc + (grocery.price * grocery.quantity);
+      //     }, 0);
+      //     return acc + receiptTotal;
+      // }, 0);
+
+      // // Assign the calculated totalSpend to the current "Minggu"
+      // schedule.totalSpend = totalSpend;
+      // })
+      // console.log("newSchedules dari persistance", newSchedules)
+
+      // return newSchedules
     } catch (e) {
       // console.log(e)
       throw new AppError({

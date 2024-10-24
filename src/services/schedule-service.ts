@@ -15,7 +15,6 @@ export class ScheduleService {
     try {
       const schedule = Schedule.create(scheduleData);
       console.log("Schedule data:", schedule);
-
       const storedSchedule = await this._repository.store(schedule);
       console.log("Schedule stored:", storedSchedule);
 
@@ -31,7 +30,9 @@ export class ScheduleService {
 
   public async findAll(): Promise<ISchedule[]> {
     const schedules = await this._repository.findAll();
+    console.log("schedules dari service", schedules)
     const shceduleDto = schedules.map((schedule) => schedule.unmarshal());
+    console.log("schedules service hasil dari unmarshal", shceduleDto)
     return shceduleDto;
   }
 }
