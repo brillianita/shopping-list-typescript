@@ -1,9 +1,10 @@
 import { GroceryRepository } from "../../domain/service/grocery-repository";
 import { Grocery } from "../../infrastructure/database/models/grocery";
-import { Grocery as EntityGrocery, IGrocery, Unit } from "../../domain/models/grocery";
+import { Grocery as EntityGrocery, IGrocery, EUnit } from "../../domain/models/grocery";
 import { sequelize } from "../../infrastructure/database/sequelize";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";
 import { injectable } from "inversify";
+import { IntegerDataType } from "sequelize";
 
 @injectable()
 export class GrocerySequelizeRepository implements GroceryRepository {
@@ -11,13 +12,11 @@ export class GrocerySequelizeRepository implements GroceryRepository {
   public async store(groceryDomain: EntityGrocery): Promise<EntityGrocery> {
     const transaction = await sequelize.transaction();
     try {
-      const unit = typeof groceryDomain.unit === "string"
-        ? Unit[groceryDomain.unit as keyof typeof Unit]
-        : groceryDomain.unit;
       const grocery = await Grocery.create(
         {
+          id: groceryDomain.id,
           name: groceryDomain.name,
-          unit,
+          unit: groceryDomain.unit,
           price: groceryDomain.price,
         },
         {
@@ -29,6 +28,7 @@ export class GrocerySequelizeRepository implements GroceryRepository {
       await transaction.commit();
 
       const entity = EntityGrocery.create({
+        id: grocery.id,
         name: grocery.name,
         unit: grocery.unit,
         price: grocery.price,
@@ -79,10 +79,6 @@ export class GrocerySequelizeRepository implements GroceryRepository {
 
   async update(id: string, groceryDomain: EntityGrocery): Promise<EntityGrocery> {
     const grocery = await Grocery.findByPk(id);
-
-    const unit = typeof groceryDomain.unit === "string"
-      ? Unit[groceryDomain.unit as keyof typeof Unit]
-      : groceryDomain.unit;
     if (!grocery) {
       throw new AppError({
         statusCode: HttpCode.NOT_FOUND,
@@ -91,7 +87,7 @@ export class GrocerySequelizeRepository implements GroceryRepository {
     }
     await grocery.update({
       name: groceryDomain.name,
-      unit,
+      unit: groceryDomain.unit,
       price: groceryDomain.price,
     });
     await grocery.reload();

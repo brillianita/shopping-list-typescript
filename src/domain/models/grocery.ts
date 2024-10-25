@@ -1,4 +1,6 @@
-export enum Unit {
+import { Entity } from "./entity";
+
+export enum EUnit {
   kg = "kg",
   gram = "gram",
   liter = "liter",
@@ -8,22 +10,16 @@ export enum Unit {
 export interface IGrocery {
   id?: string;
   name: string;
-  unit: string | Unit;
+  unit: string | EUnit;
   price: number;
 }
 
-export class Grocery {
-  private _id?: string;
-  private _name: string;
-  private _unit: string | Unit;
-  private _price: number;
-
+export class Grocery extends Entity<IGrocery> {
   private constructor(props: IGrocery) {
-    this._id = props.id;
-    this._name = props.name;
-    this._unit = props.unit;
-    this._price = props.price;
+    const { id, ...data } = props;
+    super(data, id);
   }
+
 
   public static create(props: IGrocery): Grocery {
     const instance = new Grocery(props);
@@ -33,9 +29,9 @@ export class Grocery {
   public unmarshal(): IGrocery {
     return {
       id: this._id,
-      name: this._name,
-      unit: this._unit,
-      price: this._price,
+      name: this.name,
+      unit: this.unit,
+      price: this.price,
     };
   }
 
@@ -45,14 +41,14 @@ export class Grocery {
   }
 
   get name(): string {
-    return this._name;
+    return this.props.name;
   }
 
-  get unit(): string | Unit {
-    return this._unit;
+  get unit(): string | EUnit {
+    return this.props.unit;
   }
 
   get price(): number {
-    return this._price;
+    return this.props.price;
   }
 }
