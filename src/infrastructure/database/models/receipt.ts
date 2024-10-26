@@ -5,8 +5,6 @@ import { Grocery } from "./grocery";
 export class Receipt extends Model<InferAttributes<Receipt>, InferCreationAttributes<Receipt>> {
   declare id: CreationOptional<string>;
   declare name: string;
-  declare createdAt?: Date;
-  declare updatedAt?: Date;
   declare Groceries?: Grocery[];
 
   declare addGroceries : BelongsToManyAddAssociationsMixin<Grocery,string>

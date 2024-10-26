@@ -4,11 +4,12 @@ import { Receipt as EntityReceipt, IReceipt } from "../../domain/models/receipt"
 import { sequelize } from "../../infrastructure/database/sequelize";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";
 import { injectable } from "inversify";
+import { IReceiptInput } from "../../dto/receipt-dto";
 
 @injectable()
 export class ReceiptSequelizeRepository implements ReceiptRepository {
 
-  public async store(receiptDomain: EntityReceipt): Promise<EntityReceipt> {
+  public async store(receiptDomain: IReceiptInput): Promise<EntityReceipt> {
     const transaction = await sequelize.transaction();
     try {
       const receipt = await Receipt.create(
@@ -42,17 +43,34 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
       await Promise.all(newGrocery.map(async (grocery) => {
         console.log(`Adding grocery with ID ${grocery.model.id} and quantity ${grocery.quantity}`);
         return receipt.addGrocery(grocery.model, {
-          through: { quantity: grocery.quantity },
+          through: { quantity: grocery.quantity }, 
           transaction,
         });
       }));
 
       await transaction.commit();
 
+
+      const receiptWithGroceries = await Receipt.findByPk(receipt.id, {
+        include: [{
+          model: Grocery,
+          through: {
+            attributes: ['quantity'] 
+          }
+        }],
+        transaction
+      });
+
       const entity = EntityReceipt.create({
-        id: receipt.id,
-        name: receipt.name,
-        groceries: receiptDomain.groceries,
+        id: receiptWithGroceries?.id,
+        name: receiptWithGroceries.name,
+        groceries: receiptWithGroceries?.Groceries?.map(grocery => ({
+          id: grocery.id,
+          name: grocery.name,
+          unit: grocery.unit,
+          price: grocery.price,
+          quantity: (grocery as any).ReceiptGroceries.quantity  
+        })) || [],
       });
 
       return entity;
@@ -68,173 +86,173 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
   }
 
 
-  public async findAll(): Promise<EntityReceipt[]> {
-    try {
-      const receipts = await Receipt.findAll({
-        include: [{
-          model: Grocery,
-          through: { attributes: ['quantity'] },
-        }],
-      });
-      return receipts.map((receipt) => {
-        return EntityReceipt.create({
-          id: receipt.id,
-          name: receipt.name,
-          groceries: receipt.Groceries?.map(grocery => ({
-            id: grocery.id,
-            name: grocery.name,
-            unit: grocery.unit,
-            price: grocery.price,
-            quantity: (grocery as any).ReceiptGroceries.quantity
-          })) || [],
-        });
-      });
-    } catch (e) {
-      throw new AppError({
-        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        description: "Failed to fetch receipts",
-        error: e,
-      });
-    }
-  }
+  // public async findAll(): Promise<EntityReceipt[]> {
+  //   try {
+  //     const receipts = await Receipt.findAll({
+  //       include: [{
+  //         model: Grocery,
+  //         through: { attributes: ['quantity'] },
+  //       }],
+  //     });
+  //     return receipts.map((receipt) => {
+  //       return EntityReceipt.create({
+  //         id: receipt.id,
+  //         name: receipt.name,
+  //         groceries: receipt.Groceries?.map(grocery => ({
+  //           id: grocery.id,
+  //           name: grocery.name,
+  //           unit: grocery.unit,
+  //           price: grocery.price,
+  //           quantity: (grocery as any).ReceiptGroceries.quantity
+  //         })) || [],
+  //       });
+  //     });
+  //   } catch (e) {
+  //     throw new AppError({
+  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+  //       description: "Failed to fetch receipts",
+  //       error: e,
+  //     });
+  //   }
+  // }
 
 
 
-  public async findById(id: string): Promise<EntityReceipt> {
-    try {
-      const receipt = await Receipt.findByPk(id, {
-        include: [{
-          model: Grocery,
-          through: { attributes: ['quantity'] },
-        }],
-      });
+  // public async findById(id: string): Promise<EntityReceipt> {
+  //   try {
+  //     const receipt = await Receipt.findByPk(id, {
+  //       include: [{
+  //         model: Grocery,
+  //         through: { attributes: ['quantity'] },
+  //       }],
+  //     });
 
 
-      if (!receipt) {
-        throw new AppError({
-          statusCode: HttpCode.NOT_FOUND,
-          description: `Receipt with ID ${id} not found`,
-        });
-      }
+  //     if (!receipt) {
+  //       throw new AppError({
+  //         statusCode: HttpCode.NOT_FOUND,
+  //         description: `Receipt with ID ${id} not found`,
+  //       });
+  //     }
 
-      return EntityReceipt.create({
-        id: receipt.id,
-        name: receipt.name,
-        groceries: receipt.Groceries?.map(grocery => ({
-          id: grocery.id,
-          name: grocery.name,
-          unit: grocery.unit,
-          price: grocery.price,
-          quantity: (grocery as any).ReceiptGroceries.quantity
-        })) || [],
-      });
-    } catch (e) {
-      throw new AppError({
-        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        description: "Failed to fetch receipt",
-        error: e,
-      });
-    }
-  }
+  //     return EntityReceipt.create({
+  //       id: receipt.id,
+  //       name: receipt.name,
+  //       groceries: receipt.Groceries?.map(grocery => ({
+  //         id: grocery.id,
+  //         name: grocery.name,
+  //         unit: grocery.unit,
+  //         price: grocery.price,
+  //         quantity: (grocery as any).ReceiptGroceries.quantity
+  //       })) || [],
+  //     });
+  //   } catch (e) {
+  //     throw new AppError({
+  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+  //       description: "Failed to fetch receipt",
+  //       error: e,
+  //     });
+  //   }
+  // }
 
-  async update(id: string, receiptDomain: EntityReceipt): Promise<EntityReceipt> {
-    const transaction = await sequelize.transaction();
-    try {
-      const receipt = await Receipt.findByPk(id, {
-        include: [Grocery],
-        transaction,
-      });
+  // async update(id: string, receiptDomain: EntityReceipt): Promise<EntityReceipt> {
+  //   const transaction = await sequelize.transaction();
+  //   try {
+  //     const receipt = await Receipt.findByPk(id, {
+  //       include: [Grocery],
+  //       transaction,
+  //     });
 
-      if (!receipt) {
-        throw new AppError({
-          statusCode: HttpCode.NOT_FOUND,
-          description: `Receipt with ID ${id} not found`,
-        });
-      }
+  //     if (!receipt) {
+  //       throw new AppError({
+  //         statusCode: HttpCode.NOT_FOUND,
+  //         description: `Receipt with ID ${id} not found`,
+  //       });
+  //     }
 
-      receipt.name = receiptDomain.name;
-      await receipt.save({ transaction });
+  //     receipt.name = receiptDomain.name;
+  //     await receipt.save({ transaction });
 
-      const groceries = await Grocery.findAll({
-        where: {
-          id: receiptDomain.groceries.map((grocery) => grocery.id),
-        },
-        transaction,
-      });
+  //     const groceries = await Grocery.findAll({
+  //       where: {
+  //         id: receiptDomain.groceries.map((grocery) => grocery.id),
+  //       },
+  //       transaction,
+  //     });
 
-      const newGroceries = receiptDomain.groceries.map(grocery => {
-        const matchingGrocery = groceries.find(g => g.id === grocery.id);
-        if (!matchingGrocery) {
-          throw new AppError({
-            statusCode: HttpCode.BAD_REQUEST,
-            description: `Grocery with ID ${grocery.id} not found in database.`,
-          });
-        } else {
-          return { model: matchingGrocery, quantity: grocery.quantity };
-        }
-      });
+  //     const newGroceries = receiptDomain.groceries.map(grocery => {
+  //       const matchingGrocery = groceries.find(g => g.id === grocery.id);
+  //       if (!matchingGrocery) {
+  //         throw new AppError({
+  //           statusCode: HttpCode.BAD_REQUEST,
+  //           description: `Grocery with ID ${grocery.id} not found in database.`,
+  //         });
+  //       } else {
+  //         return { model: matchingGrocery, quantity: grocery.quantity };
+  //       }
+  //     });
 
-      await receipt.removeGroceries(receipt.Groceries || [], { transaction });
+  //     await receipt.removeGroceries(receipt.Groceries || [], { transaction });
 
-      await Promise.all(newGroceries.map(async (grocery) => {
-        console.log(`Adding grocery with ID ${grocery.model.id} and quantity ${grocery.quantity}`);
-        return receipt.addGrocery(grocery.model, {
-          through: { quantity: grocery.quantity },
-          transaction,
-        });
-      }));
+  //     await Promise.all(newGroceries.map(async (grocery) => {
+  //       console.log(`Adding grocery with ID ${grocery.model.id} and quantity ${grocery.quantity}`);
+  //       return receipt.addGrocery(grocery.model, {
+  //         through: { quantity: grocery.quantity },
+  //         transaction,
+  //       });
+  //     }));
 
-      await transaction.commit();
+  //     await transaction.commit();
 
-      const updatedEntity = EntityReceipt.create({
-        id: receipt.id,
-        name: receipt.name,
-        groceries: receiptDomain.groceries,
-      });
+  //     const updatedEntity = EntityReceipt.create({
+  //       id: receipt.id,
+  //       name: receipt.name,
+  //       groceries: receiptDomain.groceries,
+  //     });
 
-      return updatedEntity;
+  //     return updatedEntity;
 
-    } catch (e) {
-      await transaction.rollback();
-      throw new AppError({
-        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        description: "Failed to update receipt",
-        error: e,
-      });
-    }
-  }
+  //   } catch (e) {
+  //     await transaction.rollback();
+  //     throw new AppError({
+  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+  //       description: "Failed to update receipt",
+  //       error: e,
+  //     });
+  //   }
+  // }
 
-  async destroy(id: string): Promise<boolean> {
-    const transaction = await sequelize.transaction(); 
-    try {
-      const receipt = await Receipt.findByPk(id, {
-        include: [Grocery],
-        transaction,
-      });
+  // async destroy(id: string): Promise<boolean> {
+  //   const transaction = await sequelize.transaction(); 
+  //   try {
+  //     const receipt = await Receipt.findByPk(id, {
+  //       include: [Grocery],
+  //       transaction,
+  //     });
   
-      if (!receipt) {
-        throw new AppError({
-          statusCode: HttpCode.NOT_FOUND,
-          description: "Receipt was not found",
-        });
-      }
+  //     if (!receipt) {
+  //       throw new AppError({
+  //         statusCode: HttpCode.NOT_FOUND,
+  //         description: "Receipt was not found",
+  //       });
+  //     }
   
-      if (receipt.Groceries && receipt.Groceries.length > 0) {
-        await receipt.removeGroceries(receipt.Groceries, { transaction });
-      }
+  //     if (receipt.Groceries && receipt.Groceries.length > 0) {
+  //       await receipt.removeGroceries(receipt.Groceries, { transaction });
+  //     }
   
-      await receipt.destroy({ transaction });
+  //     await receipt.destroy({ transaction });
   
-      await transaction.commit();
-      return true;
-    } catch (error) {
-      await transaction.rollback(); 
-      throw new AppError({
-        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        description: "Failed to delete receipt",
-        error,
-      });
-    }
-  }
+  //     await transaction.commit();
+  //     return true;
+  //   } catch (error) {
+  //     await transaction.rollback(); 
+  //     throw new AppError({
+  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+  //       description: "Failed to delete receipt",
+  //       error,
+  //     });
+  //   }
+  // }
   
 }

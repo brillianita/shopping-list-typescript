@@ -9,9 +9,9 @@ const TYPES = {
   ScheduleRepository: Symbol.for("ScheduleRepository"),
 
   // Service Layer
- GroceryService: Symbol.for("GroceryService"),
- ReceiptService: Symbol.for("ReceiptService"),
- ScheduleService: Symbol.for("ScheduleService"),
+  GroceryService: Symbol.for("GroceryService"),
+  ReceiptService: Symbol.for("ReceiptService"),
+  ScheduleService: Symbol.for("ScheduleService"),
 };
 
 export { TYPES };

@@ -8,7 +8,7 @@ import { AppError, HttpCode } from "../libs/exceptions/app-error";
 export class ScheduleService {
   constructor(
     @inject(TYPES.ScheduleRepository) private _repository: ScheduleRepository
-  ) {}
+  ) { }
 
   // Create a new schedule
   public async store(scheduleData: ISchedule): Promise<ISchedule> {
@@ -27,4 +27,12 @@ export class ScheduleService {
         error,
       });
     }
-  }}
+
+
+  }
+  public async findAll(): Promise<ISchedule[]> {
+    const schedules = await this._repository.findAll();
+    const shceduleDto = schedules.map((schedule) => schedule.unmarshal());
+    return shceduleDto;
+  }
+}

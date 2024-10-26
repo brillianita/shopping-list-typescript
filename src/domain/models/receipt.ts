@@ -1,18 +1,23 @@
+import { Entity } from "./entity";
+
+export interface IGroceryReceipt {
+  id: string;
+  name: string;
+  unit: string;
+  price: number;
+  quantity: number;
+}
+
 export interface IReceipt {
   id?: string;
   name: string;
-  groceries: {id: string; quantity: number}[];
+  groceries: IGroceryReceipt[];
 }
 
-export class Receipt {
-  private _id?: string;
-  private _name: string;
-  private _groceries: { id: string; quantity: number}[];
-
+export class Receipt extends Entity<IReceipt> {
   private constructor(props: IReceipt) {
-    this._id = props.id;
-    this._name = props.name;
-    this._groceries = props.groceries;
+    const { id, ...data } = props;
+    super(data, id);
   }
 
   public static create(props: IReceipt): Receipt {
@@ -23,8 +28,8 @@ export class Receipt {
   public unmarshal(): IReceipt {
     return {
       id: this._id,
-      name: this._name,
-      groceries: this._groceries,
+      name: this.name,
+      groceries: this.groceries, 
     };
   }
 
@@ -33,10 +38,10 @@ export class Receipt {
   }
 
   get name(): string {
-    return this._name;
+    return this.name; 
   }
-  
-  get groceries(): {id: string; quantity: number}[] {
-    return this._groceries;
+
+  get groceries(): IGroceryReceipt[] {
+    return this.groceries;  
   }
 }
