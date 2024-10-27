@@ -60,10 +60,8 @@ export class ReceiptService {
 
   public async findAll(): Promise<IReceipt[]> {
     try {
-      const receipts = await this._receiptRepository.findAll(); // Mengambil semua receipt melalui repository
-      console.log("Receipts fetched:", receipts);
+      const receipts = await this._receiptRepository.findAll(); 
 
-      // Mengembalikan semua receipt dalam bentuk IReceipt setelah unmarshaling
       return receipts.map(receipt => receipt.unmarshal());
     } catch (error) {
       throw new AppError({
@@ -74,27 +72,27 @@ export class ReceiptService {
     }
   }
 
-  // public async findById(receiptId: string): Promise<IReceipt> {
-  //   try {
-  //     const receipt = await this._repository.findById(receiptId);
-  //     if (!receipt) {
-  //       throw new AppError({
-  //         statusCode: HttpCode.NOT_FOUND,
-  //         description: `Receipt with ID ${receiptId} not found`,
-  //       });
-  //     }
+  public async findById(receiptId: string): Promise<IReceipt> {
+    try {
+      const receipt = await this._receiptRepository.findById(receiptId);
+      if (!receipt) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Receipt with ID ${receiptId} not found`,
+        });
+      }
 
-  //     console.log("Receipt fetched:", receipt);
+      console.log("Receipt fetched:", receipt);
 
-  //     return receipt.unmarshal();
-  //   } catch (error) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-  //       description: `Failed to fetch receipt with ID ${receiptId}`,
-  //       error,
-  //     });
-  //   }
-  // }
+      return receipt.unmarshal();
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to fetch receipt with ID ${receiptId}`,
+        error,
+      });
+    }
+  }
 
   // public async update(receiptId: string, updatedReceipt: IReceipt): Promise<IReceipt> {
   //   try {
