@@ -31,10 +31,10 @@ export class ReceiptRoutes {
       asyncWrap(this.ReceiptControllerInstance.updateReceipt.bind(this.ReceiptControllerInstance))
     )
 
-    // router.delete(
-    //   `/${this.route}/:id`,
-    //   asyncWrap(this.ReceiptControllerInstance.deleteReceipt.bind(this.ReceiptControllerInstance))
-    // )
+    router.delete(
+      `/${this.route}/:id`,
+      asyncWrap(this.ReceiptControllerInstance.deleteReceipt.bind(this.ReceiptControllerInstance))
+    )
   }
 }
 

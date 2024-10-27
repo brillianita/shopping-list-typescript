@@ -140,28 +140,28 @@ export class ReceiptService {
     return updatedReceipt.unmarshal();
   }
 
-  // public async destroy(id: string): Promise<boolean> {
-  //   try {
-  //     const receipt = await this._repository.findById(id);
-  //     if (!receipt) {
-  //       throw new AppError({
-  //         statusCode: HttpCode.NOT_FOUND,
-  //         description: `Receipt with ID ${id} not found`,
-  //       });
-  //     }
+  public async destroy(id: string): Promise<boolean> {
+    try {
+      const receipt = await this._receiptRepository.findById(id);
+      if (!receipt) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Receipt with ID ${id} not found`,
+        });
+      }
 
-  //     await this._repository.destroy(id);
+      await this._receiptRepository.destroy(id);
 
-  //     console.log(`Receipt with ID ${id} deleted successfully.`);
-  //     return true;
-  //   } catch (error) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-  //       description: `Failed to delete receipt with ID ${id}`,
-  //       error,
-  //     });
-  //   }
-  // }
+      console.log(`Receipt with ID ${id} deleted successfully.`);
+      return true;
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to delete receipt with ID ${id}`,
+        error,
+      });
+    }
+  }
 
 
 }

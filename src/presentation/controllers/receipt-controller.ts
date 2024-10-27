@@ -58,10 +58,10 @@ export default class ReceiptController {
     });
   }
 
-  // public async deleteReceipt(req: Request, res: Response): Promise<Response> {
-  //   await this._receiptService.destroy(req.params.id);
-  //   return res.json({
-  //     message: "Receipt has been deleted",
-  //   });
-  // }
+  public async deleteReceipt(req: Request, res: Response): Promise<Response> {
+    await this._receiptService.destroy(req.params.id);
+    return res.json({
+      message: "Receipt has been deleted",
+    });
+  }
 }

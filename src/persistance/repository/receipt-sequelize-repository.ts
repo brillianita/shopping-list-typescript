@@ -223,37 +223,37 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
 
 
 
-  // async destroy(id: string): Promise<boolean> {
-  //   const transaction = await sequelize.transaction(); 
-  //   try {
-  //     const receipt = await Receipt.findByPk(id, {
-  //       include: [Grocery],
-  //       transaction,
-  //     });
+  async destroy(id: string): Promise<boolean> {
+    const transaction = await sequelize.transaction(); 
+    try {
+      const receipt = await Receipt.findByPk(id, {
+        include: [Grocery],
+        transaction,
+      });
 
-  //     if (!receipt) {
-  //       throw new AppError({
-  //         statusCode: HttpCode.NOT_FOUND,
-  //         description: "Receipt was not found",
-  //       });
-  //     }
+      if (!receipt) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: "Receipt was not found",
+        });
+      }
 
-  //     if (receipt.Groceries && receipt.Groceries.length > 0) {
-  //       await receipt.removeGroceries(receipt.Groceries, { transaction });
-  //     }
+      if (receipt.Groceries && receipt.Groceries.length > 0) {
+        await receipt.removeGroceries(receipt.Groceries, { transaction });
+      }
 
-  //     await receipt.destroy({ transaction });
+      await receipt.destroy({ transaction });
 
-  //     await transaction.commit();
-  //     return true;
-  //   } catch (error) {
-  //     await transaction.rollback(); 
-  //     throw new AppError({
-  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-  //       description: "Failed to delete receipt",
-  //       error,
-  //     });
-  //   }
-  // }
+      await transaction.commit();
+      return true;
+    } catch (error) {
+      await transaction.rollback(); 
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: "Failed to delete receipt",
+        error,
+      });
+    }
+  }
 
 }
