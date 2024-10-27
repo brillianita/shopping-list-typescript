@@ -39,6 +39,15 @@ export default class GroceryController {
       data: grocery,
     });
   }
+  
+  public async findGroceryByIds(req: Request, res: Response): Promise<Response> {
+    const ids = req.body.ids;
+    const groceries = await this._groceryService.findByIds(ids);
+    return res.json({
+      message: "success",
+      data: groceries,
+    });
+  }
 
   public async updateGrocery(req: Request, res: Response): Promise<Response> {
     const validatedReq = groceryScheme.safeParse(req.body);

@@ -77,6 +77,24 @@ export class GrocerySequelizeRepository implements GroceryRepository {
     });
   }
 
+  public async findByIds(ids: string[]): Promise<EntityGrocery[]> {
+    const  groceries =  await Grocery.findAll({
+        where: {
+            id: ids,
+        },
+    });
+
+    const entityGroceries = groceries.map((grocery) =>
+      EntityGrocery.create({
+        id: grocery.id,
+        name: grocery.name,
+        unit: grocery.unit,
+        price: grocery.price,
+      })
+    );
+    return entityGroceries;
+}
+
   async update(id: string, groceryDomain: EntityGrocery): Promise<EntityGrocery> {
     const grocery = await Grocery.findByPk(id);
     if (!grocery) {

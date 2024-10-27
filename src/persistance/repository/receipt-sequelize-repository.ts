@@ -12,15 +12,17 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
   public async store(receiptDomain: IReceiptInput): Promise<EntityReceipt> {
     const transaction = await sequelize.transaction();
     try {
-      const receipt = await Receipt.create(
-        {
-          name: receiptDomain.name,
-        },
-        {
-          transaction,
-        }
-      );
+      console.log('sebelum receipt create');
+      console.log('Receipt data:', receiptDomain.name);
 
+      // Create a new receipt
+      const receipt = await Receipt.create(
+        { name: receiptDomain.name },
+        { transaction }
+      );
+      console.log('setelah receipt create');
+
+      // Fetch groceries based on IDs from the request
       const groceries = await Grocery.findAll({
         where: {
           id: receiptDomain.groceries.map((grocery) => grocery.id),
@@ -28,62 +30,68 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
         transaction,
       });
 
-      const newGrocery = receiptDomain.groceries.map(grocery => {
-        const matchingGrocery = groceries.find((g) => g.id === grocery.id);
+      // Map groceries to add quantity from receiptDomain
+      const newGroceries = receiptDomain.groceries.map(groceryInput => {
+        const matchingGrocery = groceries.find(g => g.id === groceryInput.id);
         if (!matchingGrocery) {
           throw new AppError({
             statusCode: HttpCode.BAD_REQUEST,
-            description: `Grocery with ID ${grocery.id} not found in database.`,
+            description: `Grocery with ID ${groceryInput.id} not found in the database.`,
           });
-        } else {
-          return { model: matchingGrocery, quantity: grocery.quantity };
         }
+        return { model: matchingGrocery, quantity: groceryInput.quantity };
       });
 
-      await Promise.all(newGrocery.map(async (grocery) => {
+      await Promise.all(newGroceries.map(async (grocery) => {
         console.log(`Adding grocery with ID ${grocery.model.id} and quantity ${grocery.quantity}`);
         return receipt.addGrocery(grocery.model, {
-          through: { quantity: grocery.quantity }, 
+          through: { quantity: grocery.quantity },
           transaction,
         });
       }));
 
       await transaction.commit();
 
-
       const receiptWithGroceries = await Receipt.findByPk(receipt.id, {
         include: [{
           model: Grocery,
-          through: {
-            attributes: ['quantity'] 
-          }
-        }],
-        transaction
+          through: { attributes: ['quantity'] }
+        }]
       });
+
+      if (!receiptWithGroceries) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: "Receipt not found after creation.",
+        });
+      }
 
       const entity = EntityReceipt.create({
         id: receiptWithGroceries?.id,
         name: receiptWithGroceries.name,
-        groceries: receiptWithGroceries?.Groceries?.map(grocery => ({
+        groceries: receiptWithGroceries.Groceries?.map(grocery => ({
           id: grocery.id,
           name: grocery.name,
           unit: grocery.unit,
           price: grocery.price,
-          quantity: (grocery as any).ReceiptGroceries.quantity  
+          quantity: (grocery as any).ReceiptGroceries.quantity
         })) || [],
       });
 
       return entity;
 
-    } catch (e) {
+    } catch (error) {
       await transaction.rollback();
+      console.error("Error details:", error); // Log the full error details
       throw new AppError({
         statusCode: HttpCode.BAD_REQUEST,
-        description: "Failed to create receipt",
-        error: e,
+        description: "Failed to store receipt",
+        error,
       });
     }
   }
+
+
 
 
   // public async findAll(): Promise<EntityReceipt[]> {
@@ -229,20 +237,20 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
   //       include: [Grocery],
   //       transaction,
   //     });
-  
+
   //     if (!receipt) {
   //       throw new AppError({
   //         statusCode: HttpCode.NOT_FOUND,
   //         description: "Receipt was not found",
   //       });
   //     }
-  
+
   //     if (receipt.Groceries && receipt.Groceries.length > 0) {
   //       await receipt.removeGroceries(receipt.Groceries, { transaction });
   //     }
-  
+
   //     await receipt.destroy({ transaction });
-  
+
   //     await transaction.commit();
   //     return true;
   //   } catch (error) {
@@ -254,5 +262,5 @@ export class ReceiptSequelizeRepository implements ReceiptRepository {
   //     });
   //   }
   // }
-  
+
 }

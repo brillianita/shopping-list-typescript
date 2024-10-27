@@ -15,21 +15,25 @@ export interface IReceipt {
 }
 
 export class Receipt extends Entity<IReceipt> {
+  // private _name: string;
+  // private _groceries: IGroceryReceipt[];
+
   private constructor(props: IReceipt) {
     const { id, ...data } = props;
     super(data, id);
+    // this._name = name;
+    // this._groceries = groceries;
   }
 
   public static create(props: IReceipt): Receipt {
-    const instance = new Receipt(props);
-    return instance;
+    return new Receipt(props);
   }
 
   public unmarshal(): IReceipt {
     return {
       id: this._id,
       name: this.name,
-      groceries: this.groceries, 
+      groceries: this.groceries,
     };
   }
 
@@ -38,10 +42,10 @@ export class Receipt extends Entity<IReceipt> {
   }
 
   get name(): string {
-    return this.name; 
+    return this.props.name;
   }
 
   get groceries(): IGroceryReceipt[] {
-    return this.groceries;  
+    return this.props.groceries;
   }
 }

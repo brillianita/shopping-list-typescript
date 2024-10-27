@@ -30,6 +30,13 @@ export class GroceryService {
     const grocery = await this._repository.findById(id);
     return grocery.unmarshal();
   }
+  
+
+  public async findByIds(id: string[]): Promise<IGrocery[]> {
+    const groceries = await this._repository.findByIds(id);
+    const groceryDto = groceries.map((grocery) => grocery.unmarshal());
+    return groceryDto;
+  }
 
   public async update(id: string, _grocery: IGrocery): Promise<IGrocery> {
     const toUpdateGrocery = Grocery.create({

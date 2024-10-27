@@ -1,29 +1,60 @@
-import { IReceipt, Receipt } from "../domain/models/receipt";
+import { IGroceryReceipt, IReceipt, Receipt } from "../domain/models/receipt";
 import { ReceiptRepository } from "../domain/service/receipt-repository";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
 import { AppError, HttpCode } from "../libs/exceptions/app-error";
 import { IReceiptInput } from "../dto/receipt-dto";
+import { GroceryRepository } from "../domain/service/grocery-repository";
 
 @injectable()
 export class ReceiptService {
-  constructor(@inject(TYPES.ReceiptRepository) private _repository: ReceiptRepository) { }
+  constructor(
+    @inject(TYPES.ReceiptRepository) private _receiptRepository: ReceiptRepository,
+    @inject(TYPES.GroceryRepository) private _groceryRepository: GroceryRepository
+  ) { }
 
-  public async store(_receipt: IReceiptInput): Promise<IReceipt> {
-    try {
-      const receiptData = Receipt.create(_receipt);
-      console.log("Receipt data:", receiptData);
-      const receipt = await this._repository.store(receiptData);
-      console.log("Receipt stored:", receipt);
+  public async store(receiptData: IReceiptInput): Promise<IReceipt> {
+      console.log('sebelum findbyids')
+      const groceryDetails = await this._groceryRepository.findByIds(
+        receiptData.groceries.map(g => g.id)
+      );
 
-      return receipt.unmarshal();
-    } catch (error) {
-      throw new AppError({
-        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        description: "Failed to store receipt",
-        error,
-      });
-    }
+      // Check if all groceries in the request exist in the database
+      if (groceryDetails.length !== receiptData.groceries.length) {
+        console.log('if else')
+        throw new AppError({
+          statusCode: HttpCode.BAD_REQUEST,
+          description: "Some groceries in the request were not found.",
+        });
+      }
+
+      console.log('groceryDetaild service', groceryDetails)
+
+      // Build the full receipt data with grocery details and quantities
+      const fullReceiptData: IReceipt = {
+        name: receiptData.name,
+        groceries: groceryDetails.map(grocery => {
+          const inputGrocery = receiptData.groceries.find(g => g.id === grocery.id);
+          return {
+              id: grocery.id,
+              name: grocery.name,
+              unit: grocery.unit,
+              price: grocery.price,
+              quantity: inputGrocery ? inputGrocery.quantity : 0,
+          } as IGroceryReceipt;
+      }),
+      };
+    
+      // Create a domain entity from the full receipt data
+      const receiptDomain = Receipt.create(fullReceiptData);
+      console.log("Receipt data to store:", receiptDomain);
+
+      // Store the receipt using the repository
+      const storedReceipt = await this._receiptRepository.store(receiptDomain);
+      console.log("Receipt successfully stored:", storedReceipt);
+
+      // Return the stored receipt in a standard format
+      return storedReceipt.unmarshal();
   }
 
   // public async findAll(): Promise<IReceipt[]> {

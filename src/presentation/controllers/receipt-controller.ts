@@ -26,42 +26,42 @@ export default class ReceiptController {
     });
   }
 
-  public async listReceipt(req: Request, res: Response): Promise<Response> {
-    const receipts = await this._receiptService.findAll();
-    return res.status(200).send({ message: "success", data: receipts });
-  }
+  // public async listReceipt(req: Request, res: Response): Promise<Response> {
+  //   const receipts = await this._receiptService.findAll();
+  //   return res.status(200).send({ message: "success", data: receipts });
+  // }
 
-  public async findReceiptById(req: Request, res: Response): Promise<Response> {
-      const receiptId = req.params.id;
-      const receipt = await this._receiptService.findById(receiptId); 
+  // public async findReceiptById(req: Request, res: Response): Promise<Response> {
+  //     const receiptId = req.params.id;
+  //     const receipt = await this._receiptService.findById(receiptId); 
 
-      return res.json({
-        message: "success",
-        data: receipt,
-      });
-  }
+  //     return res.json({
+  //       message: "success",
+  //       data: receipt,
+  //     });
+  // }
 
 
-  public async updateReceipt(req: Request, res: Response): Promise<Response> {
-    const validatedReq = receiptScheme.safeParse(req.body);
-    if (!validatedReq.success) {
-      throw new AppError({
-        statusCode: HttpCode.VALIDATION_ERROR,
-        description: "Request validation error",
-        data: validatedReq.error.flatten().fieldErrors,
-      });
-    }
-    const created = await this._receiptService.update(req.params.id, validatedReq.data);
-    return res.json({
-      message: "success",
-      data: created,
-    });
-  }
+  // public async updateReceipt(req: Request, res: Response): Promise<Response> {
+  //   const validatedReq = receiptScheme.safeParse(req.body);
+  //   if (!validatedReq.success) {
+  //     throw new AppError({
+  //       statusCode: HttpCode.VALIDATION_ERROR,
+  //       description: "Request validation error",
+  //       data: validatedReq.error.flatten().fieldErrors,
+  //     });
+  //   }
+  //   const created = await this._receiptService.update(req.params.id, validatedReq.data);
+  //   return res.json({
+  //     message: "success",
+  //     data: created,
+  //   });
+  // }
 
-  public async deleteReceipt(req: Request, res: Response): Promise<Response> {
-    await this._receiptService.destroy(req.params.id);
-    return res.json({
-      message: "Receipt has been deleted",
-    });
-  }
+  // public async deleteReceipt(req: Request, res: Response): Promise<Response> {
+  //   await this._receiptService.destroy(req.params.id);
+  //   return res.json({
+  //     message: "Receipt has been deleted",
+  //   });
+  // }
 }
