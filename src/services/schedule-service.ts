@@ -66,4 +66,23 @@ export class ScheduleService {
       });
     }
   }
+
+  public async destroy(id: string): Promise<boolean> {
+    try {
+      const isDeleted = await this._scheduleRepository.destroy(id);
+      if (!isDeleted) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Schedule with ID ${id} could not be deleted.`,
+        });
+      }
+      return isDeleted;
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: "Failed to delete schedule",
+        error,
+      });
+    }
+  }
 }

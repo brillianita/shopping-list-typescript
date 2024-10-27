@@ -6,5 +6,5 @@ export interface ScheduleRepository {
     findById(id: string): Promise<Schedule>;
     store(schedule: IScheduleInput): Promise<Schedule>;
     update(id: string, schedule: IScheduleInput): Promise<Schedule>;
-    // destroy(id: string): Promise<boolean>;
+    destroy(id: string): Promise<boolean>;
 }

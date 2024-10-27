@@ -69,13 +69,12 @@ export default class ScheduleController {
     });
   }
 
-  // // Menghapus jadwal berdasarkan ID
-  // public async deleteSchedule(req: Request, res: Response): Promise<Response> {
-  //   const { id } = req.params;
+  public async deleteSchedule(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
 
-  //   await this._scheduleService.destroy(id);
-  //   return res.status(200).json({
-  //     message: `Schedule with ID ${id} has been deleted.`,
-  //   });
-  // }
+    await this._scheduleService.destroy(id);
+    return res.status(200).json({
+      message: `Schedule with ID ${id} has been deleted.`,
+    });
+  }
 }

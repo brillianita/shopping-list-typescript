@@ -27,16 +27,12 @@ export class ScheduleRoutes {
       `/${this.route}/:id`,
       asyncWrap(this.ScheduleControllerInstance.updateSchedule.bind(this.ScheduleControllerInstance))
     )
+
+    router.delete(
+      `/${this.route}/:id`,
+      asyncWrap(this.ScheduleControllerInstance.deleteSchedule.bind(this.ScheduleControllerInstance))
+    )
   }
 
-
-
-
-
-  //   router.delete(
-  //     `/${this.route}/:id`,
-  //     asyncWrap(this.ScheduleControllerInstance.deleteSchedule.bind(this.ScheduleControllerInstance))
-  //   )
-  // }
 }
 

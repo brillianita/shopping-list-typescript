@@ -27,7 +27,7 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
         transaction,
       });
 
-    
+
       await schedule.addReceipts(receipts, { transaction });
       await transaction.commit();
 
@@ -88,7 +88,7 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
           })) || [],
         });
 
-        
+
         return scheduleEntity;
       });
 
@@ -201,4 +201,41 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
       });
     }
   }
+  public async destroy(id: string): Promise<boolean> {
+    const transaction = await sequelize.transaction();
+    try {
+      // Find the schedule by ID and include associated receipts
+      const schedule = await Schedule.findByPk(id, {
+        include: [{ model: Receipt }],
+        transaction,
+      });
+
+      // If schedule not found, throw an error
+      if (!schedule) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Schedule with ID ${id} not found.`,
+        });
+      }
+
+      // Remove associated receipts from the junction table
+      if (schedule.Receipts && schedule.Receipts.length > 0) {
+        await schedule.removeReceipts(schedule.Receipts, { transaction });
+      }
+
+      // Delete the schedule
+      await schedule.destroy({ transaction });
+
+      await transaction.commit();
+      return true;
+    } catch (error) {
+      await transaction.rollback();
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: "Failed to delete schedule",
+        error,
+      });
+    }
+  }
+
 }
