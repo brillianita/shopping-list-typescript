@@ -58,21 +58,21 @@ export class ReceiptService {
   }
 
 
-  // public async findAll(): Promise<IReceipt[]> {
-  //   try {
-  //     const receipts = await this._repository.findAll(); // Mengambil semua receipt melalui repository
-  //     console.log("Receipts fetched:", receipts);
+  public async findAll(): Promise<IReceipt[]> {
+    try {
+      const receipts = await this._receiptRepository.findAll(); // Mengambil semua receipt melalui repository
+      console.log("Receipts fetched:", receipts);
 
-  //     // Mengembalikan semua receipt dalam bentuk IReceipt setelah unmarshaling
-  //     return receipts.map(receipt => receipt.unmarshal());
-  //   } catch (error) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-  //       description: "Failed to fetch receipts",
-  //       error,
-  //     });
-  //   }
-  // }
+      // Mengembalikan semua receipt dalam bentuk IReceipt setelah unmarshaling
+      return receipts.map(receipt => receipt.unmarshal());
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: "Failed to fetch receipts",
+        error,
+      });
+    }
+  }
 
   // public async findById(receiptId: string): Promise<IReceipt> {
   //   try {

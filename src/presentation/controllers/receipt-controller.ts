@@ -26,10 +26,10 @@ export default class ReceiptController {
     });
   }
 
-  // public async listReceipt(req: Request, res: Response): Promise<Response> {
-  //   const receipts = await this._receiptService.findAll();
-  //   return res.status(200).send({ message: "success", data: receipts });
-  // }
+  public async listReceipt(req: Request, res: Response): Promise<Response> {
+    const receipts = await this._receiptService.findAll();
+    return res.status(200).send({ message: "success", data: receipts });
+  }
 
   // public async findReceiptById(req: Request, res: Response): Promise<Response> {
   //     const receiptId = req.params.id;

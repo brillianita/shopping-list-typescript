@@ -15,10 +15,10 @@ export class ReceiptRoutes {
       asyncWrap(this.ReceiptControllerInstance.createReceipt.bind(this.ReceiptControllerInstance))
     )
 
-    // router.get(
-    //   `/${this.route}`,
-    //   asyncWrap(this.ReceiptControllerInstance.listReceipt.bind(this.ReceiptControllerInstance))
-    // )
+    router.get(
+      `/${this.route}`,
+      asyncWrap(this.ReceiptControllerInstance.listReceipt.bind(this.ReceiptControllerInstance))
+    )
 
     // router.get(
     //   `/${this.route}/:id`,
