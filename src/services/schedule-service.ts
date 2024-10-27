@@ -1,23 +1,19 @@
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
-import { ISchedule, Schedule } from "../domain/models/schedule";
+import { ISchedule, Schedule as EntitySchedule } from "../domain/models/schedule";
 import { ScheduleRepository } from "../domain/service/schedule-repository";
 import { AppError, HttpCode } from "../libs/exceptions/app-error";
+import { IScheduleInput } from "../dto/schedule-dto";
 
 @injectable()
 export class ScheduleService {
   constructor(
-    @inject(TYPES.ScheduleRepository) private _repository: ScheduleRepository
+    @inject(TYPES.ScheduleRepository) private _scheduleRepository: ScheduleRepository
   ) { }
 
-  // Create a new schedule
-  public async store(scheduleData: ISchedule): Promise<ISchedule> {
+  public async store(scheduleData: IScheduleInput): Promise<ISchedule> {
     try {
-      const schedule = Schedule.create(scheduleData);
-      console.log("Schedule data:", schedule);
-
-      const storedSchedule = await this._repository.store(schedule);
-      console.log("Schedule stored:", storedSchedule);
+      const storedSchedule = await this._scheduleRepository.store(scheduleData);
 
       return storedSchedule.unmarshal();
     } catch (error) {
@@ -27,12 +23,19 @@ export class ScheduleService {
         error,
       });
     }
-
-
   }
+  
   public async findAll(): Promise<ISchedule[]> {
-    const schedules = await this._repository.findAll();
-    const shceduleDto = schedules.map((schedule) => schedule.unmarshal());
-    return shceduleDto;
+    try {
+      const schedules = await this._scheduleRepository.findAll();
+
+      return schedules.map(schedule => schedule.unmarshal());
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: "Failed to fetch schedules",
+        error,
+      });
+    }
   }
 }

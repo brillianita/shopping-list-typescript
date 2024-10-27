@@ -36,7 +36,7 @@ export class Grocery extends Entity<IGrocery> {
   }
 
   // Getters
-  get id(): string | undefined {
+  get id(): string {
     return this._id;
   }
 

@@ -1,23 +1,17 @@
+import { Entity } from "./entity";
+import { IReceipt } from "./receipt";
 
 export interface ISchedule {
   id?: string;
   name: string;
-  receipts: any[];
   totalSpend?: number;
+  receipts: IReceipt[];
 }
 
-export class Schedule {
-  // [x: string]: any;
-  private _id?: string;
-  private _name: string;
-  private _receipts: any[];
-  private _totalSpend?: number;
-
+export class Schedule extends Entity<ISchedule> {
   private constructor(props: ISchedule) {
-    this._id = props.id;
-    this._name = props.name;
-    this._totalSpend = props.totalSpend;
-    this._receipts = props.receipts;
+    const { id, ...data } = props;
+    super(data, id);
   }
 
   public static create(props: ISchedule): Schedule {
@@ -27,9 +21,9 @@ export class Schedule {
   public unmarshal(): ISchedule {
     return {
       id: this._id,
-      name: this._name,
-      totalSpend: this._totalSpend,
-      receipts: this._receipts,
+      name: this.name,
+      totalSpend: this.calculateTotalSpend(),
+      receipts: this.receipts,
     };
   }
 
@@ -38,14 +32,19 @@ export class Schedule {
   }
 
   get name(): string {
-    return this._name;
+    return this.props.name;
   }
 
-  get receipts():any[] {
-    return this._receipts;
+  get receipts(): IReceipt[] {
+    return this.props.receipts;
   }
 
-  get totalSpend(): number | undefined {
-    return this._totalSpend;
+  // Method to calculate totalSpend
+  private calculateTotalSpend(): number {
+    return this.receipts.reduce((total, receipt) => {
+      return total + receipt.groceries.reduce((sum, grocery) => {
+        return sum + (grocery.price * grocery.quantity);
+      }, 0);
+    }, 0);
   }
 }

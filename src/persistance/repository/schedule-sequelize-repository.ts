@@ -1,52 +1,54 @@
 import { ScheduleRepository } from "../../domain/service/schedule-repository";
 import { Schedule as EntitySchedule, ISchedule } from "../../domain/models/schedule";
-import { Schedule } from "../../infrastructure/database/models/schedule";
-import { Receipt } from "../../infrastructure/database/models/receipt";
-import { Grocery } from "../../infrastructure/database/models/grocery";
+import { Schedule, Receipt, Grocery } from "../../infrastructure/database/models";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";
 import { sequelize } from "../../infrastructure/database/sequelize";
 import { injectable } from "inversify";
-import { log } from "console";
+import { IScheduleInput } from "../../dto/schedule-dto";
 
 @injectable()
 export class ScheduleSequelizeRepository implements ScheduleRepository {
-
-  public async store(scheduleDomain: EntitySchedule): Promise<EntitySchedule> {
+  public async store(scheduleDomain: IScheduleInput): Promise<EntitySchedule> {
     const transaction = await sequelize.transaction();
     try {
       const schedule = await Schedule.create(
-        {
-          name: scheduleDomain.name,
-        },
+        { name: scheduleDomain.name },
         { transaction }
       );
 
       const receipts = await Receipt.findAll({
-        where: {
-          id: scheduleDomain.receipts,
-        },
+        where: { id: scheduleDomain.receipts },
+        include: [
+          {
+            model: Grocery,
+            through: { attributes: ['quantity'] },
+          },
+        ],
         transaction,
       });
 
-      if (!schedule.id) {
-        throw new Error("Failed to generate Schedule ID");
-      }
-
-      await Promise.all(
-        receipts.map(async (receipt) => {
-          await schedule.addReceipt(receipt, { transaction });
-        })
-      );
-
+    
+      await schedule.addReceipts(receipts, { transaction });
       await transaction.commit();
 
-      const entity = EntitySchedule.create({
+      const scheduleEntity = EntitySchedule.create({
         id: schedule.id,
         name: schedule.name,
-        receipts: receipts.map(receipt => receipt.id),
+        receipts: receipts.map(receipt => ({
+          id: receipt.id,
+          name: receipt.name,
+          groceries: receipt.Groceries?.map(grocery => ({
+            id: grocery.id,
+            name: grocery.name,
+            unit: grocery.unit,
+            price: grocery.price,
+            quantity: (grocery as any).ReceiptGroceries?.quantity || 0,
+          })) || [],
+        })),
       });
 
-      return entity;
+      return scheduleEntity;
+
     } catch (error) {
       await transaction.rollback();
       throw new AppError({
@@ -63,26 +65,16 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
         include: [{
           model: Receipt,
           include: [{
-            model: Grocery
+            model: Grocery,
+            through: { attributes: ["quantity"] },
           }],
         }],
       });
 
       return schedules.map((schedule) => {
-        return EntitySchedule.create({
+        const scheduleEntity = EntitySchedule.create({
           id: schedule.id,
           name: schedule.name,
-          totalSpend: schedule.Receipts?.reduce((acc, receipt) => {
-            console.log("acc", acc)
-            console.log("receipt", receipt)
-            const receiptTotal = receipt.Groceries?.reduce((groceryAcc: any, grocery: any) => {
-              console.log("groceryAcc", groceryAcc)
-              console.log("grocery", grocery)
-              return groceryAcc + (grocery.price * (grocery as any).ReceiptGroceries.quantity);
-            }, 0);
-            console.log("receiptTotal", receiptTotal)
-            return acc + receiptTotal;
-          }, 0),
           receipts: schedule.Receipts?.map(receipt => ({
             id: receipt.id,
             name: receipt.name,
@@ -91,16 +83,20 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
               name: grocery.name,
               unit: grocery.unit,
               price: grocery.price,
-              quantity: (grocery as any).ReceiptGroceries.quantity
+              quantity: (grocery as any).ReceiptGroceries?.quantity || 0,
             })) || [],
           })) || [],
         });
+
+        
+        return scheduleEntity;
       });
-    } catch (e) {
+
+    } catch (error) {
       throw new AppError({
         statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        description: "Failed to fetch receipts",
-        error: e,
+        description: "Failed to fetch schedules",
+        error,
       });
     }
   }

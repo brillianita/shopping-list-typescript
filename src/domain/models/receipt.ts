@@ -15,14 +15,10 @@ export interface IReceipt {
 }
 
 export class Receipt extends Entity<IReceipt> {
-  // private _name: string;
-  // private _groceries: IGroceryReceipt[];
 
   private constructor(props: IReceipt) {
     const { id, ...data } = props;
     super(data, id);
-    // this._name = name;
-    // this._groceries = groceries;
   }
 
   public static create(props: IReceipt): Receipt {
@@ -37,7 +33,7 @@ export class Receipt extends Entity<IReceipt> {
     };
   }
 
-  get id(): string | undefined {
+  get id(): string {
     return this._id;
   }
 

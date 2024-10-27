@@ -11,11 +11,9 @@ export default class ScheduleController {
     @inject(TYPES.ScheduleService) private _scheduleService: ScheduleService
   ) { }
 
-  // Membuat jadwal baru
   public async createSchedule(req: Request, res: Response): Promise<Response> {
     const validatedReq = scheduleScheme.safeParse(req.body);
 
-    // Validasi input request body
     if (!validatedReq.success) {
       throw new AppError({
         statusCode: HttpCode.VALIDATION_ERROR,
@@ -24,7 +22,6 @@ export default class ScheduleController {
       });
     }
 
-    // Simpan jadwal baru melalui ScheduleService
     const createdSchedule = await this._scheduleService.store(validatedReq.data);
 
     return res.status(201).json({
