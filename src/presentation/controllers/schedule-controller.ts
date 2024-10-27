@@ -38,25 +38,16 @@ export default class ScheduleController {
     });
   }
 
-  // // Mendapatkan semua jadwal
-  // public async listSchedules(req: Request, res: Response): Promise<Response> {
-  //   const schedules = await this._scheduleService.findAll();
-  //   return res.status(200).json({
-  //     message: "success",
-  //     data: schedules,
-  //   });
-  // }
 
-  // // Mendapatkan jadwal berdasarkan ID
-  // public async getScheduleById(req: Request, res: Response): Promise<Response> {
-  //   const { id } = req.params;
+  public async getScheduleById(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
 
-  //   const schedule = await this._scheduleService.findById(id);
-  //   return res.status(200).json({
-  //     message: "success",
-  //     data: schedule,
-  //   });
-  // }
+    const schedule = await this._scheduleService.findById(id);
+    return res.status(200).json({
+      message: "success",
+      data: schedule,
+    });
+  }
 
   // // Memperbarui jadwal berdasarkan ID
   // public async updateSchedule(req: Request, res: Response): Promise<Response> {

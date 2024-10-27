@@ -100,4 +100,52 @@ export class ScheduleSequelizeRepository implements ScheduleRepository {
       });
     }
   }
+
+  public async findById(id: string): Promise<EntitySchedule> {
+    try {
+      const schedule = await Schedule.findByPk(id, {
+        include: [{
+          model: Receipt,
+          include: [{
+            model: Grocery,
+            through: { attributes: ["quantity"] },
+          }],
+        }],
+      });
+
+      // Check if the schedule exists
+      if (!schedule) {
+        throw new AppError({
+          statusCode: HttpCode.NOT_FOUND,
+          description: `Schedule with ID ${id} not found.`,
+        });
+      }
+
+      // Map the database schedule to the domain model
+      const scheduleEntity = EntitySchedule.create({
+        id: schedule.id,
+        name: schedule.name,
+        receipts: schedule.Receipts?.map(receipt => ({
+          id: receipt.id,
+          name: receipt.name,
+          groceries: receipt.Groceries?.map(grocery => ({
+            id: grocery.id,
+            name: grocery.name,
+            unit: grocery.unit,
+            price: grocery.price,
+            quantity: (grocery as any).ReceiptGroceries?.quantity || 0,
+          })) || [],
+        })) || [],
+      });
+
+      return scheduleEntity;
+
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: "Failed to fetch schedule",
+        error,
+      });
+    }
+  }
 }

@@ -38,4 +38,18 @@ export class ScheduleService {
       });
     }
   }
+
+  public async findById(id: string): Promise<ISchedule> {
+    try {
+      const schedule = await this._scheduleRepository.findById(id);
+
+      return schedule.unmarshal();
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to fetch schedule with ID ${id}`,
+        error,
+      });
+    }
+  }
 }
