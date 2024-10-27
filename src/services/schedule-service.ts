@@ -52,4 +52,18 @@ export class ScheduleService {
       });
     }
   }
+
+  public async updateById(id: string, scheduleData: IScheduleInput): Promise<ISchedule> {
+    try {
+      const updatedSchedule = await this._scheduleRepository.update(id, scheduleData);
+
+      return updatedSchedule.unmarshal();
+    } catch (error) {
+      throw new AppError({
+        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
+        description: `Failed to update schedule with ID ${id}`,
+        error,
+      });
+    }
+  }
 }

@@ -49,28 +49,25 @@ export default class ScheduleController {
     });
   }
 
-  // // Memperbarui jadwal berdasarkan ID
-  // public async updateSchedule(req: Request, res: Response): Promise<Response> {
-  //   const { id } = req.params;
+  public async updateSchedule(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
 
-  //   // Validasi input request body
-  //   const validatedReq = scheduleScheme.safeParse(req.body);
-  //   if (!validatedReq.success) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.VALIDATION_ERROR,
-  //       description: "Request validation error",
-  //       data: validatedReq.error.flatten().fieldErrors,
-  //     });
-  //   }
+    const validatedReq = scheduleScheme.safeParse(req.body);
+    if (!validatedReq.success) {
+      throw new AppError({
+        statusCode: HttpCode.VALIDATION_ERROR,
+        description: "Request validation error",
+        data: validatedReq.error.flatten().fieldErrors,
+      });
+    }
 
-  //   // Update jadwal melalui ScheduleService
-  //   const updatedSchedule = await this._scheduleService.update(id, validatedReq.data);
+    const updatedSchedule = await this._scheduleService.updateById(id, validatedReq.data);
 
-  //   return res.status(200).json({
-  //     message: "Schedule updated successfully",
-  //     data: updatedSchedule,
-  //   });
-  // }
+    return res.status(200).json({
+      message: "Schedule updated successfully",
+      data: updatedSchedule,
+    });
+  }
 
   // // Menghapus jadwal berdasarkan ID
   // public async deleteSchedule(req: Request, res: Response): Promise<Response> {

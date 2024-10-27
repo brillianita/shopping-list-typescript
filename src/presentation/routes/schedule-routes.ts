@@ -14,23 +14,24 @@ export class ScheduleRoutes {
       `/${this.route}`,
       asyncWrap(this.ScheduleControllerInstance.createSchedule.bind(this.ScheduleControllerInstance))
     )
-      router.get(
-        `/${this.route}`,
-        asyncWrap(this.ScheduleControllerInstance.listSchedules.bind(this.ScheduleControllerInstance))
-      )
-      router.get(
-        `/${this.route}/:id`,
-        asyncWrap(this.ScheduleControllerInstance.getScheduleById.bind(this.ScheduleControllerInstance))
-      )
+    router.get(
+      `/${this.route}`,
+      asyncWrap(this.ScheduleControllerInstance.listSchedules.bind(this.ScheduleControllerInstance))
+    )
+    router.get(
+      `/${this.route}/:id`,
+      asyncWrap(this.ScheduleControllerInstance.getScheduleById.bind(this.ScheduleControllerInstance))
+    )
+
+    router.put(
+      `/${this.route}/:id`,
+      asyncWrap(this.ScheduleControllerInstance.updateSchedule.bind(this.ScheduleControllerInstance))
+    )
   }
 
 
 
 
-  //   router.put(
-  //     `/${this.route}/:id`,
-  //     asyncWrap(this.ScheduleControllerInstance.updateSchedule.bind(this.ScheduleControllerInstance))
-  //   )
 
   //   router.delete(
   //     `/${this.route}/:id`,
