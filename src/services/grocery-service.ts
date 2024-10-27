@@ -8,7 +8,7 @@ export class GroceryService {
   constructor(@inject(TYPES.GroceryRepository) private _repository: GroceryRepository) { }
 
   public async store(_grocery: IGrocery): Promise<IGrocery> {
-    const groceryData = Grocery.create(_grocery);
+    Grocery.create(_grocery);
 
     const grocery = await this._repository.store(
       Grocery.create({

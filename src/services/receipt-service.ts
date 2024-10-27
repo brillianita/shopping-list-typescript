@@ -14,21 +14,17 @@ export class ReceiptService {
   ) { }
 
   public async store(receiptData: IReceiptInput): Promise<IReceipt> {
-      console.log('sebelum findbyids')
       const groceryDetails = await this._groceryRepository.findByIds(
         receiptData.groceries.map(g => g.id)
       );
 
       // Check if all groceries in the request exist in the database
       if (groceryDetails.length !== receiptData.groceries.length) {
-        console.log('if else')
         throw new AppError({
           statusCode: HttpCode.BAD_REQUEST,
           description: "Some groceries in the request were not found.",
         });
       }
-
-      console.log('groceryDetaild service', groceryDetails)
 
       // Build the full receipt data with grocery details and quantities
       const fullReceiptData: IReceipt = {
