@@ -14,44 +14,49 @@ export class ReceiptService {
   ) { }
 
   public async store(receiptData: IReceiptInput): Promise<IReceipt> {
-      const groceryDetails = await this._groceryRepository.findByIds(
-        receiptData.groceries.map(g => g.id)
-      );
+    // Fetch all groceries based on IDs from the request
+    const groceryDetails = await this._groceryRepository.findByIds(
+      receiptData.groceries.map(g => g.id)
+    );
 
-      // Check if all groceries in the request exist in the database
-      if (groceryDetails.length !== receiptData.groceries.length) {
-        throw new AppError({
-          statusCode: HttpCode.BAD_REQUEST,
-          description: "Some groceries in the request were not found.",
-        });
-      }
-
-      // Build the full receipt data with grocery details and quantities
-      const fullReceiptData: IReceipt = {
-        name: receiptData.name,
-        groceries: groceryDetails.map(grocery => {
-          const inputGrocery = receiptData.groceries.find(g => g.id === grocery.id);
-          return {
-              id: grocery.id,
-              name: grocery.name,
-              unit: grocery.unit,
-              price: grocery.price,
-              quantity: inputGrocery ? inputGrocery.quantity : 0,
-          } as IGroceryReceipt;
-      }),
+    const groceryMap: { [key: string]: IGroceryReceipt } = {};
+    groceryDetails.forEach(grocery => {
+      groceryMap[grocery.id as string] = {
+        id: grocery.id as string,
+        name: grocery.name,
+        unit: grocery.unit,
+        price: grocery.price,
+        quantity: 0
       };
-    
-      // Create a domain entity from the full receipt data
-      const receiptDomain = Receipt.create(fullReceiptData);
-      console.log("Receipt data to store:", receiptDomain);
+    });
 
-      // Store the receipt using the repository
-      const storedReceipt = await this._receiptRepository.store(receiptDomain);
-      console.log("Receipt successfully stored:", storedReceipt);
+    if (Object.keys(groceryMap).length !== receiptData.groceries.length) {
+      throw new AppError({
+        statusCode: HttpCode.BAD_REQUEST,
+        description: "Some groceries in the request were not found.",
+      });
+    }
 
-      // Return the stored receipt in a standard format
-      return storedReceipt.unmarshal();
+    receiptData.groceries.forEach(groceryInput => {
+      if (groceryMap[groceryInput.id]) {
+        groceryMap[groceryInput.id].quantity = groceryInput.quantity;
+      }
+    });
+
+    const fullReceiptData: IReceipt = {
+      name: receiptData.name,
+      groceries: Object.values(groceryMap)
+    };
+
+    const receiptDomain = Receipt.create(fullReceiptData);
+    console.log("Receipt data to store:", receiptDomain);
+
+    const storedReceipt = await this._receiptRepository.store(receiptDomain);
+    console.log("Receipt successfully stored:", storedReceipt);
+
+    return storedReceipt.unmarshal();
   }
+
 
   // public async findAll(): Promise<IReceipt[]> {
   //   try {

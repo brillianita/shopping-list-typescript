@@ -4,7 +4,7 @@ import { Grocery as EntityGrocery, IGrocery, EUnit } from "../../domain/models/g
 import { sequelize } from "../../infrastructure/database/sequelize";
 import { AppError, HttpCode } from "../../libs/exceptions/app-error";
 import { injectable } from "inversify";
-import { IntegerDataType } from "sequelize";
+import { IntegerDataType, Op } from "sequelize";
 
 @injectable()
 export class GrocerySequelizeRepository implements GroceryRepository {
@@ -80,7 +80,7 @@ export class GrocerySequelizeRepository implements GroceryRepository {
   public async findByIds(ids: string[]): Promise<EntityGrocery[]> {
     const  groceries =  await Grocery.findAll({
         where: {
-            id: ids,
+            id: { [Op.in]: ids },
         },
     });
 
