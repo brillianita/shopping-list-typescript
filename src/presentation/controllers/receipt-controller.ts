@@ -42,21 +42,21 @@ export default class ReceiptController {
   }
 
 
-  // public async updateReceipt(req: Request, res: Response): Promise<Response> {
-  //   const validatedReq = receiptScheme.safeParse(req.body);
-  //   if (!validatedReq.success) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.VALIDATION_ERROR,
-  //       description: "Request validation error",
-  //       data: validatedReq.error.flatten().fieldErrors,
-  //     });
-  //   }
-  //   const created = await this._receiptService.update(req.params.id, validatedReq.data);
-  //   return res.json({
-  //     message: "success",
-  //     data: created,
-  //   });
-  // }
+  public async updateReceipt(req: Request, res: Response): Promise<Response> {
+    const validatedReq = receiptScheme.safeParse(req.body);
+    if (!validatedReq.success) {
+      throw new AppError({
+        statusCode: HttpCode.VALIDATION_ERROR,
+        description: "Request validation error",
+        data: validatedReq.error.flatten().fieldErrors,
+      });
+    }
+    const updated = await this._receiptService.update(req.params.id, validatedReq.data);
+    return res.json({
+      message: "success",
+      data: updated,
+    });
+  }
 
   // public async deleteReceipt(req: Request, res: Response): Promise<Response> {
   //   await this._receiptService.destroy(req.params.id);

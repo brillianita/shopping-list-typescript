@@ -94,28 +94,51 @@ export class ReceiptService {
     }
   }
 
-  // public async update(receiptId: string, updatedReceipt: IReceipt): Promise<IReceipt> {
-  //   try {
-  //     const receipt = await this._repository.findById(receiptId);
-  //     if (!receipt) {
-  //       throw new AppError({
-  //         statusCode: HttpCode.NOT_FOUND,
-  //         description: `Receipt with ID ${receiptId} not found`,
-  //       });
-  //     }
+  public async update(id: string, receiptData: IReceiptInput): Promise<IReceipt> {
+    const existingReceipt = await this._receiptRepository.findById(id);
+    if (!existingReceipt) {
+      throw new AppError({
+        statusCode: HttpCode.NOT_FOUND,
+        description: `Receipt with ID ${id} not found.`,
+      });
+    }
 
-  //     const updated = await this._repository.update(receiptId, Receipt.create(updatedReceipt));
-  //     console.log("Receipt updated:", updated);
+    const groceryDetails = await this._groceryRepository.findByIds(
+      receiptData.groceries.map(g => g.id)
+    );
 
-  //     return updated.unmarshal();
-  //   } catch (error) {
-  //     throw new AppError({
-  //       statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-  //       description: `Failed to update receipt with ID ${receiptId}`,
-  //       error,
-  //     });
-  //   }
-  // }
+    if (groceryDetails.length !== receiptData.groceries.length) {
+      throw new AppError({
+        statusCode: HttpCode.BAD_REQUEST,
+        description: "Some groceries in the request were not found.",
+      });
+    }
+
+    const groceryMap: { [key: string]: IGroceryReceipt } = {};
+    groceryDetails.forEach(grocery => {
+      groceryMap[grocery.id as string] = {
+        id: grocery.id as string,
+        name: grocery.name,
+        unit: grocery.unit,
+        price: grocery.price,
+        quantity: receiptData.groceries.find(g => g.id === grocery.id)?.quantity || 0
+      };
+    });
+
+    const fullReceiptData: IReceipt = {
+      id,
+      name: receiptData.name,
+      groceries: Object.values(groceryMap)
+    };
+
+    const receiptDomain = Receipt.create(fullReceiptData);
+    console.log("Receipt data to update:", receiptDomain);
+
+    const updatedReceipt = await this._receiptRepository.update(id, receiptDomain);
+    console.log("Receipt successfully updated:", updatedReceipt);
+
+    return updatedReceipt.unmarshal();
+  }
 
   // public async destroy(id: string): Promise<boolean> {
   //   try {

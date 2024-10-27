@@ -26,10 +26,10 @@ export class ReceiptRoutes {
     )
 
 
-    // router.put(
-    //   `/${this.route}/:id`,
-    //   asyncWrap(this.ReceiptControllerInstance.updateReceipt.bind(this.ReceiptControllerInstance))
-    // )
+    router.put(
+      `/${this.route}/:id`,
+      asyncWrap(this.ReceiptControllerInstance.updateReceipt.bind(this.ReceiptControllerInstance))
+    )
 
     // router.delete(
     //   `/${this.route}/:id`,
